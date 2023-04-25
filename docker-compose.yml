@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  local:
+    build:
+      context: .
+    image: cron_service
+    volumes:
+      - ./src:/api/src
+    container_name: cron_service_local
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    tty: true
+    entrypoint: ["npm", "run", "dev"]
+    networks:
+      - pledu_network
+      - backoffice_network
+networks:
+  pledu_network:
+    external: true
+  backoffice_network:
+    external: true
