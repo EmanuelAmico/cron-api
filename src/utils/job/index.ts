@@ -1,24 +1,28 @@
 import { CronJob, CronTime } from "cron";
 import { StrictUnion } from "../../types";
 
-interface Job {
-  name: string;
-  cron?: string;
-  cronJob?: CronJob;
-  timer?: number;
-  timeout?: NodeJS.Timeout;
-  callback: () => void;
-  stop: () => void;
-  start: () => void;
-  edit: (
+interface IJob {
+  readonly name: string;
+  readonly cron?: string;
+  readonly timer?: number;
+  stop(): void;
+  start(): void;
+  edit(
     job: { name: string; callback?: () => void } & StrictUnion<
       { timer: number } | { cron: string }
     >
-  ) => void;
-  erase: () => void;
+  ): void;
+  erase(): void;
 }
 
-class Job {
+class Job implements IJob {
+  public name: string;
+  public cron?: string;
+  private cronJob?: CronJob;
+  public timer?: number;
+  private timeout?: NodeJS.Timeout;
+  private callback: () => void;
+
   constructor({
     name,
     cron,
@@ -28,84 +32,19 @@ class Job {
     { timer: number } | { cron: string }
   >) {
     if (Job.runningJobs.find((job) => job.name === name))
-      throw new Error("A job with that name already exists");
+      throw new Error("A job with that name already exists.");
 
     this.name = name;
     this.callback = callback;
 
-    if (!cron && !timer) throw new Error("Invalid job");
+    if (!cron && !timer) throw new Error("Invalid job, missing cron or timer.");
 
     if (cron) {
-      const cronJob = new CronJob(
-        cron,
-        callback,
-        null,
-        true,
-        "America/Argentina/Buenos_Aires"
-      );
-
       this.cron = cron;
-
-      this.start = () => {
-        cronJob.start();
-        Job.runningJobs.push(this);
-      };
-
-      this.stop = () => {
-        cronJob.stop();
-        Job.runningJobs = Job.runningJobs.filter(
-          (job) => job.name !== this.name
-        );
-      };
-
-      this.edit = ({ name, callback, cron }) => {
-        if (!cron) throw new Error("No cron provided");
-        this.name = name;
-        this.cronJob?.setTime(new CronTime(cron));
-        if (callback) this.callback = callback;
-      };
-
-      this.erase = () => {
-        this.cronJob?.stop();
-        Job.runningJobs = Job.runningJobs.filter(
-          (job) => job.name !== this.name
-        );
-      };
     }
 
     if (timer) {
       this.timer = timer;
-
-      this.start = () => {
-        this.timeout = setTimeout(() => {
-          Job.runningJobs = Job.runningJobs.filter(
-            (job) => job.name !== this.name
-          );
-          this.callback();
-        }, timer);
-        Job.runningJobs.push(this);
-      };
-
-      this.stop = () => {
-        if (this.timeout) clearTimeout(this.timeout);
-        Job.runningJobs = Job.runningJobs.filter(
-          (job) => job.name !== this.name
-        );
-      };
-
-      this.edit = ({ name, callback, timer }) => {
-        if (!timer) throw new Error("No timer provided");
-        this.name = name;
-        this.timer = timer;
-        if (callback) this.callback = callback;
-      };
-
-      this.erase = () => {
-        if (this.timeout) clearTimeout(this.timeout);
-        Job.runningJobs = Job.runningJobs.filter(
-          (job) => job.name !== this.name
-        );
-      };
     }
   }
 
@@ -129,6 +68,76 @@ class Job {
 
   public static searchJob(name: string) {
     return this.runningJobs.find((job) => job.name === name);
+  }
+
+  public start() {
+    if (this.cron) {
+      this.cronJob = new CronJob(
+        this.cron,
+        this.callback,
+        null,
+        true,
+        "America/Argentina/Buenos_Aires"
+      );
+    }
+
+    if (this.timer) {
+      this.timeout = setTimeout(() => {
+        Job.runningJobs = Job.runningJobs.filter(
+          (job) => job.name !== this.name
+        );
+        this.callback();
+      }, this.timer);
+    }
+
+    Job.runningJobs.push(this);
+  }
+
+  public stop() {
+    if (this.cron && this.cronJob) {
+      this.cronJob.stop();
+    }
+
+    if (this.timer && this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
+    Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
+  }
+
+  public edit({
+    name,
+    cron,
+    timer,
+    callback,
+  }: { name: string; callback?: () => void } & StrictUnion<
+    { timer: number } | { cron: string }
+  >) {
+    if (this.cron && this.cronJob) {
+      if (!cron) throw new Error("No cron provided");
+      this.name = name;
+      this.cronJob.setTime(new CronTime(cron));
+      if (callback) this.callback = callback;
+    }
+
+    if (this.timer && this.timeout) {
+      if (!timer) throw new Error("No timer provided");
+      this.name = name;
+      this.timer = timer;
+      if (callback) this.callback = callback;
+    }
+  }
+
+  public erase() {
+    if (this.cron && this.cronJob) {
+      this.cronJob.stop();
+    }
+
+    if (this.timer && this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
+    Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
   }
 }
 
