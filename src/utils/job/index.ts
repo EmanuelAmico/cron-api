@@ -21,7 +21,7 @@ class Job implements IJob {
         const result = await callback();
         if (result) console.log(result);
       } catch (error) {
-        console.error(`\tError executing job '${this.name}'\n`, "\t", error);
+        console.error(`Error executing job '${this.name}'`, error);
       }
     };
 
