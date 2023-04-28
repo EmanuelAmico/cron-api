@@ -12,7 +12,7 @@ router.use(helmet());
 router.use(express.json());
 
 // Production Logger
-if (config.env === "production") {
+if (config.NODE_ENV === "production") {
   const format = morganJSON(
     ":url :method :status :response-time ms :remote-addr"
   );

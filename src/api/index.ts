@@ -5,6 +5,8 @@ import morganBody from "morgan-body";
 import { config } from "./config/env";
 import BaseError from "./helpers/errorHandlers/HTTP/httpErrors";
 
+const { NODE_ENV, PORT } = config;
+
 const app = express();
 
 app.get("/", (_req: Request, res: Response) => {
@@ -12,7 +14,7 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // Development logger
-if (config.env === "local" || config.env === "development") {
+if (NODE_ENV === "local" || NODE_ENV === "development") {
   morganBody(app, {
     timezone: "America/Argentina/Buenos_Aires",
     theme: "dimmed",
@@ -38,6 +40,4 @@ app.use((err: BaseError, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Server start-up
-app.listen(config.port, () =>
-  console.log(`REST API Server running on port ${config.port}`)
-);
+app.listen(PORT, () => console.log(`REST API Server running on port ${PORT}`));

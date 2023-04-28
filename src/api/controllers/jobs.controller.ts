@@ -25,7 +25,7 @@ class JobsController {
     try {
       const { name, cron, timer, url, method, body } = req.body;
 
-      if (!cron && !timer) throw new Error("No cron or timer provided");
+      if (!cron && !timer) throw new Error("No cron or timer provided.");
 
       if (cron) {
         JobService.createJob({
@@ -47,7 +47,7 @@ class JobsController {
         });
       }
 
-      res.status(200).send({ message: "Job created" });
+      res.status(200).send({ message: "Job created." });
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });
@@ -62,7 +62,7 @@ class JobsController {
       const { name } = req.params;
       const { cron, timer, url, method, body } = req.body;
 
-      if (!cron && !timer) throw new Error("No cron or timer provided");
+      if (!cron && !timer) throw new Error("No cron or timer provided.");
 
       if (cron) {
         JobService.editJob({
@@ -84,7 +84,7 @@ class JobsController {
         });
       }
 
-      res.status(200).send({ message: "Job edited" });
+      res.status(200).send({ message: "Job edited." });
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });
@@ -100,7 +100,7 @@ class JobsController {
 
       JobService.deleteJob({ name });
 
-      res.status(200).send({ message: "Cron job deleted" });
+      res.status(200).send({ message: "Job deleted." });
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });

@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+echo "()=======================================================()"
+echo "                ⢯⣿⣞⡷⣯⣟⣿⣳⣯⣟⣾⢯⣷⢯⣟⣯⣿⣽⣻⢯⣿⣻
+                ⣯⡿⣞⣿⣳⢿⣽⣻⡾⣯⣟⣷⢿⣽⣻⢾⣯⣟⡷⣿⣽⣻
+                ⣽⣻⠇⠀⠀⠀⠀⠀⠈⠙⢽⡾⣧⠀⠀⠀⠀⠀⠀⣿⣞⣷
+                ⣻⣽⡇⠀⠀⣿⣟⣶⠄⠀⠈⣿⠇⠀⠀⣿⣟⣿⣻⢷⣻⡾
+                ⣟⣾⡅⠀⠀⣿⣻⢾⠃⠀⠀⣿⠇⠀⠘⠁⠉⠈⠻⣻⣽⣟
+                ⡿⣽⡆⠀⠀⠀⠀⠀⠀⣀⣼⡿⣶⢶⣴⡿⣆⠀⠀⢻⣳⣯
+                ⢿⣯⠇⠀⠀⣷⣿⣻⣟⣯⡿⣽⠋⠛⢳⣿⡻⠀⠀⢸⣯⢷
+                ⣟⣾⡇⠀⠀⣿⣷⣻⣾⣽⣻⣽⣆⠀⠀⠉⠁⠀⣠⡿⣽⣻
+                ⢿⣞⣧⣤⣤⡿⣞⣷⣟⣾⣽⣳⣯⣷⡶⣴⡶⣾⢯⣟⡿⣽
+                ⢯⣿⣞⡷⣯⣟⣿⣳⣯⣟⣾⢯⣷⢯⣟⣯⣿⣽⣻⢯⣿⣻
+"
+echo "// -----------------CHECK LINTING----------------------- //"
+npm run lint
+
+echo "// -----------------CHECK BUILDING---------------------- //"
+npm run build
+
+echo "// --------------CHECK FOR NEW CHANGES------------------ //"
+hasChanged=0 # 0 if no changes, 1 if changes
+git diff --exit-code >/dev/null || hasChanged=1
+
+if [ $hasChanged -eq 1 ]; then
+  echo "\n⚠️  You have uncommitted changes. Please commit them before pushing.\n"
+  exit 1
+else 
+  echo "\n✅  No uncommitted changes.\n"
+fi
+
+echo "// --------------------PUSHING-------------------------- //"

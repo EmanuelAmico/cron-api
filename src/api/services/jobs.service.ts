@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Job } from "../helpers";
+import { Job } from "../../utils";
 import { StrictUnion } from "../../types";
 
 class JobService {

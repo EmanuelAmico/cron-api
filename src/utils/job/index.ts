@@ -1,19 +1,6 @@
 import { CronJob, CronTime } from "cron";
-import { StrictUnion } from "../../types";
-
-interface IJob {
-  readonly name: string;
-  readonly cron?: string;
-  readonly timer?: number;
-  stop(): void;
-  start(): void;
-  edit(
-    job: { name: string; callback?: () => void } & StrictUnion<
-      { timer: number } | { cron: string }
-    >
-  ): void;
-  erase(): void;
-}
+import { IJob, JobData } from "../../types";
+import { formattedNowDate } from "../date";
 
 class Job implements IJob {
   public name: string;
@@ -23,19 +10,16 @@ class Job implements IJob {
   private timeout?: NodeJS.Timeout;
   private callback: () => void;
 
-  constructor({
-    name,
-    cron,
-    timer,
-    callback,
-  }: { name: string; callback: () => void } & StrictUnion<
-    { timer: number } | { cron: string }
-  >) {
+  constructor({ name, cron, timer, callback }: JobData) {
     if (Job.runningJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
     this.name = name;
-    this.callback = callback;
+    this.callback = async () => {
+      console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
+      const result = await callback();
+      if (result) console.log(result);
+    };
 
     if (!cron && !timer) throw new Error("Invalid job, missing cron or timer.");
 
@@ -105,14 +89,7 @@ class Job implements IJob {
     Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
   }
 
-  public edit({
-    name,
-    cron,
-    timer,
-    callback,
-  }: { name: string; callback?: () => void } & StrictUnion<
-    { timer: number } | { cron: string }
-  >) {
+  public edit({ name, cron, timer, callback }: JobData) {
     if (this.cron && this.cronJob) {
       if (!cron) throw new Error("No cron provided");
       this.name = name;
