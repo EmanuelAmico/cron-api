@@ -16,9 +16,13 @@ class Job implements IJob {
 
     this.name = name;
     this.callback = async () => {
-      console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
-      const result = await callback();
-      if (result) console.log(result);
+      try {
+        console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
+        const result = await callback();
+        if (result) console.log(result);
+      } catch (error) {
+        console.error(`\tError executing job '${this.name}'\n`, "\t", error);
+      }
     };
 
     if (!cron && !timer) throw new Error("Invalid job, missing cron or timer.");
