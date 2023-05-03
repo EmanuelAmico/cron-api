@@ -1,10 +1,9 @@
 import axios from "axios";
-import { StrictUnion } from "../../types";
 import { AxiosJob } from "../../utils/axios/AxiosJob";
 
 class JobService {
   public static listRunningJobs() {
-    return Job.listRunningJobs();
+    return AxiosJob.listRunningJobs();
   }
 
   public static async createJob<BodyType, ResponseType>({
@@ -30,30 +29,33 @@ class JobService {
     }
 
     if (timer) {
-      const job = new Job({ name, timer, callback });
+      const job = new AxiosJob({
+        name,
+        timer,
+        url,
+        method,
+        body,
+        instance,
+      });
+
       job.start();
     }
   }
 
-  public static async editJob({
+  public static async editJob<BodyType, ResponseType>({
     name,
     cron,
     timer,
     url,
     method,
     body,
-  }: {
-    name: string;
-    url: string;
-    method: string;
-    body?: unknown;
-  } & StrictUnion<{ cron: string } | { timer: number }>) {
-    const job = Job.searchJob(name);
+  }: ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0]) {
+    const job = AxiosJob.searchJob(name);
 
-    if (!job) throw new Error("Job not found");
+    if (!job) throw new Error("AxiosJob not found");
 
     const callback = async () => {
-      console.log(`Job with name: ${name} ran`);
+      console.log(`AxiosJob with name: ${name} ran`);
       if (url && method) {
         const { data } = await axios({
           method,
@@ -68,22 +70,22 @@ class JobService {
     };
 
     if (cron) {
-      if (!job.cron) throw new Error("Job is not a cron job");
+      if (!job.cron) throw new Error("AxiosJob is not a cron job");
 
       job.edit({ name, cron, callback });
     }
 
     if (timer) {
-      if (!job.timer) throw new Error("Job is not a timer job");
+      if (!job.timer) throw new Error("AxiosJob is not a timer job");
 
       job.edit({ name, timer, callback });
     }
   }
 
   public static deleteJob({ name }: { name: string }) {
-    const job = Job.searchJob(name);
+    const job = AxiosJob.searchJob(name);
 
-    if (!job) throw new Error("Job not found");
+    if (!job) throw new Error("AxiosJob not found");
 
     job.erase();
   }

@@ -3,16 +3,11 @@ import { Method } from "axios";
 import { JobData } from "../../types";
 import { Job } from "../job";
 
-interface AxiosJob extends Omit<Job, "callback"> {
-  readonly callback?: () => void;
-}
-
 class AxiosJob<BodyType, ResponseType> extends Job {
   public readonly method: Method;
   public readonly url: URL;
   public readonly query?: { [key: string]: string };
   public readonly body?: BodyType;
-  public readonly callback?: () => void;
 
   constructor({
     name,
@@ -29,7 +24,7 @@ class AxiosJob<BodyType, ResponseType> extends Job {
     method: Method;
     body?: BodyType;
     instance: ReturnType<typeof generateInstance>;
-  } & JobData) {
+  } & Omit<JobData, "callback">) {
     const callback = async () =>
       await instance<ResponseType>({
         method: this.method,
