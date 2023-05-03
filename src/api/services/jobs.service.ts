@@ -1,42 +1,31 @@
 import axios from "axios";
-import { Job } from "../../utils";
 import { StrictUnion } from "../../types";
+import { AxiosJob } from "../../utils/axios/AxiosJob";
 
 class JobService {
   public static listRunningJobs() {
     return Job.listRunningJobs();
   }
 
-  public static async createJob({
+  public static async createJob<BodyType, ResponseType>({
     name,
     cron,
     timer,
     url,
     method,
     body,
-  }: {
-    name: string;
-    url: string;
-    method: string;
-    body?: unknown;
-  } & StrictUnion<{ cron: string } | { timer: number }>) {
-    const callback = async () => {
-      console.log(`Job with name: ${name} ran`);
-      if (url && method) {
-        const { data } = await axios({
-          method,
-          url,
-          data: body,
-        });
-        console.log(
-          `Result for job ${name} with url ${url} and method ${method}`,
-          data
-        );
-      }
-    };
-
+    instance,
+  }: ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0]) {
     if (cron) {
-      const job = new Job({ name, cron, callback });
+      const job = new AxiosJob({
+        name,
+        cron,
+        url,
+        method,
+        body,
+        instance,
+      });
+
       job.start();
     }
 
