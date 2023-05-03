@@ -100,7 +100,7 @@ class JobsController {
 
       JobService.deleteJob({ name });
 
-      res.status(200).send({ message: "Job deleted." });
+      res.sendStatus(204);
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });

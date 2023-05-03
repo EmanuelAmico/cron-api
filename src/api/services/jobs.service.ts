@@ -1,12 +1,16 @@
-import axios from "axios";
-import { AxiosJob } from "../../utils/axios/AxiosJob";
+import { Job, AxiosJob } from "../../utils";
 
 class JobService {
   public static listRunningJobs() {
-    return AxiosJob.listRunningJobs();
+    const axiosJobs = AxiosJob.listRunningJobs();
+    const jobs = Job.listRunningJobs().filter(
+      (job) => !axiosJobs.find((axiosJob) => axiosJob.name === job.name)
+    );
+
+    return [...jobs, ...axiosJobs];
   }
 
-  public static async createJob<BodyType, ResponseType>({
+  public static createJob<BodyType, ResponseType>({
     name,
     cron,
     timer,
@@ -16,7 +20,7 @@ class JobService {
     instance,
   }: ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0]) {
     if (cron) {
-      const job = new AxiosJob({
+      const job = new AxiosJob<BodyType, ResponseType>({
         name,
         cron,
         url,
@@ -29,7 +33,7 @@ class JobService {
     }
 
     if (timer) {
-      const job = new AxiosJob({
+      const job = new AxiosJob<BodyType, ResponseType>({
         name,
         timer,
         url,
@@ -42,44 +46,32 @@ class JobService {
     }
   }
 
-  public static async editJob<BodyType, ResponseType>({
+  public static editJob<BodyType, ResponseType>({
     name,
     cron,
     timer,
     url,
+    query,
     method,
     body,
-  }: ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0]) {
+    instance,
+  }: Parameters<
+    InstanceType<typeof AxiosJob<BodyType, ResponseType>>["edit"]
+  >[0]) {
     const job = AxiosJob.searchJob(name);
 
     if (!job) throw new Error("AxiosJob not found");
 
-    const callback = async () => {
-      console.log(`AxiosJob with name: ${name} ran`);
-      if (url && method) {
-        const { data } = await axios({
-          method,
-          url,
-          data: body,
-        });
-        console.log(
-          `Result for job ${name} with url ${url} and method ${method}`,
-          data
-        );
-      }
-    };
-
-    if (cron) {
-      if (!job.cron) throw new Error("AxiosJob is not a cron job");
-
-      job.edit({ name, cron, callback });
-    }
-
-    if (timer) {
-      if (!job.timer) throw new Error("AxiosJob is not a timer job");
-
-      job.edit({ name, timer, callback });
-    }
+    job.edit({
+      name,
+      cron,
+      timer,
+      url,
+      query,
+      method,
+      body,
+      instance,
+    });
   }
 
   public static deleteJob({ name }: { name: string }) {
@@ -87,7 +79,7 @@ class JobService {
 
     if (!job) throw new Error("AxiosJob not found");
 
-    job.erase();
+    job.stop();
   }
 }
 
