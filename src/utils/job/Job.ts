@@ -4,6 +4,7 @@ import { formattedNowDate } from "../date";
 
 class Job implements IJob {
   public name: string;
+  public description?: string;
   public cron?: string;
   private cronJob?: CronJob;
   public timer?: number;
@@ -13,7 +14,15 @@ class Job implements IJob {
   protected onStop?: () => void;
   private static runningJobs: Job[] = [];
 
-  constructor({ name, cron, timer, callback, onStart, onStop }: JobData) {
+  constructor({
+    name,
+    description,
+    cron,
+    timer,
+    callback,
+    onStart,
+    onStop,
+  }: JobData) {
     if (Job.runningJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
@@ -31,6 +40,7 @@ class Job implements IJob {
     if (!cron && !timer)
       throw new Error("Invalid job, must have cron or timer.");
 
+    if (description) this.description = description;
     if (cron) this.cron = cron;
     if (timer) this.timer = timer;
     if (onStart) this.onStart = onStart;
@@ -48,6 +58,7 @@ class Job implements IJob {
   public static listRunningJobs() {
     return this.runningJobs.map((job) => ({
       name: job.name,
+      description: job.description,
       cron: job.cron,
       timer: job.timer,
     }));
@@ -75,7 +86,7 @@ class Job implements IJob {
       }, this.timer);
     }
 
-    Job.runningJobs.push(this);
+    if (this.constructor === Job) Job.runningJobs.push(this);
     if (this.onStart) this.onStart();
   }
 

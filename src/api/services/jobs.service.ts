@@ -3,9 +3,7 @@ import { Job, AxiosJob } from "../../utils";
 class JobService {
   public static listRunningJobs() {
     const axiosJobs = AxiosJob.listRunningJobs();
-    const jobs = Job.listRunningJobs().filter(
-      (job) => !axiosJobs.find((axiosJob) => axiosJob.name === job.name)
-    );
+    const jobs = Job.listRunningJobs();
 
     return [...jobs, ...axiosJobs];
   }
@@ -17,8 +15,11 @@ class JobService {
     url,
     method,
     body,
-    instance,
-  }: ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0]) {
+    headers,
+  }: Omit<
+    ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0],
+    "instance" | "onStart" | "onStop"
+  >) {
     if (cron) {
       const job = new AxiosJob<BodyType, ResponseType>({
         name,
@@ -26,7 +27,7 @@ class JobService {
         url,
         method,
         body,
-        instance,
+        headers,
       });
 
       job.start();
@@ -39,7 +40,7 @@ class JobService {
         url,
         method,
         body,
-        instance,
+        headers,
       });
 
       job.start();
@@ -48,6 +49,7 @@ class JobService {
 
   public static editJob<BodyType, ResponseType>({
     name,
+    description,
     cron,
     timer,
     url,
@@ -64,6 +66,7 @@ class JobService {
 
     job.edit({
       name,
+      description,
       cron,
       timer,
       url,

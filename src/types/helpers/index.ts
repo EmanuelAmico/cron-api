@@ -9,8 +9,6 @@ type StrictUnionHelper<T, TAll> = T extends any
 
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
 
-export type Query = { [key: string]: unknown };
-
 export interface BODY_RESPONSE<T> extends Response {
   error: unknown;
   message: string;
@@ -25,6 +23,7 @@ export interface IParameter {
   field: string;
   type: "number" | "string" | "boolean" | "array" | "object";
   optional?: boolean;
+  atLeastOne?: boolean;
 }
 
 export type CourseTag =

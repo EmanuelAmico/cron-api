@@ -12,6 +12,7 @@ export interface IJob {
 
 export type JobData = {
   name: string;
+  description?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: () => any;
   onStart?: () => void;

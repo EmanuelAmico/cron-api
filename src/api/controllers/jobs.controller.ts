@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { JobService } from "../services";
 import { JobDescription } from "../../types/api";
+import { validateParameters } from "../helpers/validateParameters";
 
 class JobsController {
   public static listRunningJobs(
@@ -23,13 +24,51 @@ class JobsController {
     res: Response
   ) {
     try {
-      const { name, cron, timer, url, method, body } = req.body;
+      const { name, description, cron, timer, url, method, body } = req.body;
+      validateParameters(
+        { name, description, cron, timer, url, method, body },
+        [
+          {
+            field: "name",
+            type: "string",
+          },
+          {
+            field: "description",
+            type: "string",
+            optional: true,
+          },
+          {
+            field: "cron",
+            type: "string",
+            atLeastOne: true,
+          },
+          {
+            field: "timer",
+            type: "number",
+            atLeastOne: true,
+          },
+          {
+            field: "url",
+            type: "string",
+          },
+          {
+            field: "method",
+            type: "string",
+          },
+          {
+            field: "body",
+            type: "object",
+            optional: true,
+          },
+        ]
+      );
 
       if (!cron && !timer) throw new Error("No cron or timer provided.");
 
       if (cron) {
         JobService.createJob({
           name,
+          description,
           cron,
           url,
           method,
@@ -40,6 +79,7 @@ class JobsController {
       if (timer) {
         JobService.createJob({
           name,
+          description,
           timer,
           url,
           method,
@@ -61,6 +101,39 @@ class JobsController {
     try {
       const { name } = req.params;
       const { cron, timer, url, method, body } = req.body;
+      validateParameters({ name }, [
+        {
+          field: "name",
+          type: "string",
+        },
+      ]);
+      validateParameters({ cron, timer, url, method, body }, [
+        {
+          field: "cron",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "timer",
+          type: "number",
+          atLeastOne: true,
+        },
+        {
+          field: "url",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "method",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "body",
+          type: "object",
+          optional: true,
+        },
+      ]);
 
       if (!cron && !timer) throw new Error("No cron or timer provided.");
 
@@ -97,6 +170,12 @@ class JobsController {
   ) {
     try {
       const { name } = req.params;
+      validateParameters({ name }, [
+        {
+          field: "name",
+          type: "string",
+        },
+      ]);
 
       JobService.deleteJob({ name });
 

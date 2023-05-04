@@ -1,11 +1,12 @@
 import { generateInstance } from "../axios";
 import { Method } from "axios";
-import { JobData } from "../../types";
+import { JobData, StrictUnion } from "../../types";
 import { Job } from ".";
 
 class AxiosJob<BodyType, ResponseType> extends Job {
-  public method: Method;
   public url: URL;
+  public method: Method;
+  public headers?: { [key: string]: string };
   public query?: { [key: string]: string };
   public body?: BodyType;
   private static runningAxiosJobs: AxiosJob<unknown, unknown>[] = [];
@@ -15,8 +16,9 @@ class AxiosJob<BodyType, ResponseType> extends Job {
     cron,
     timer,
     url: urlString,
-    query,
     method,
+    headers,
+    query,
     body,
     onStart: handleStart,
     onStop: handleStop,
@@ -26,14 +28,29 @@ class AxiosJob<BodyType, ResponseType> extends Job {
     query?: { [key: string]: string };
     method: Method;
     body?: BodyType;
-    instance: ReturnType<typeof generateInstance>;
-  } & Omit<JobData, "callback">) {
+  } & StrictUnion<
+    | { headers?: { [key: string]: string } }
+    | { instance?: ReturnType<typeof generateInstance> }
+  > &
+    Omit<JobData, "callback">) {
+    if (AxiosJob.runningAxiosJobs.find((job) => job.name === name))
+      throw new Error("A job with that name already exists.");
+
     const callback = async () =>
-      await instance<ResponseType>({
-        method: this.method,
-        url: this.url.href,
-        body: this.body,
-      });
+      instance
+        ? await instance<ResponseType>({
+            method: this.method,
+            url: this.url.href,
+            body: this.body,
+          })
+        : await generateInstance({
+            baseURL: urlString,
+            customHeaders: headers,
+          })<ResponseType>({
+            method: this.method,
+            url: this.url.href,
+            body: this.body,
+          });
 
     if (!cron && !timer)
       throw new Error("Invalid job, must have cron or timer.");
@@ -74,6 +91,7 @@ class AxiosJob<BodyType, ResponseType> extends Job {
   public static listRunningJobs() {
     return AxiosJob.runningAxiosJobs.map((job) => ({
       name: job.name,
+      description: job.description,
       cron: job.cron,
       timer: job.timer,
       url: job.url.href,
