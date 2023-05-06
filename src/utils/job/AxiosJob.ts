@@ -89,16 +89,18 @@ class AxiosJob<BodyType, ResponseType> extends Job {
   }
 
   public static listRunningJobs() {
-    return AxiosJob.runningAxiosJobs.map((job) => ({
-      name: job.name,
-      description: job.description,
-      cron: job.cron,
-      timer: job.timer,
+    const jobsWithSuperProperties = super.listRunningJobs.call(this);
+    const jobsWithThisProperties = AxiosJob.runningAxiosJobs.map((job) => ({
       url: job.url.href,
       query: job.query,
       method: job.method,
       body: job.body,
     }));
+
+    return jobsWithSuperProperties.map((_, index) => ({
+      ...jobsWithSuperProperties,
+      ...jobsWithThisProperties[index],
+    })) as unknown as AxiosJob<unknown, unknown>[];
   }
 
   public static searchJob(name: string) {

@@ -17,6 +17,8 @@ export type JobData = {
   callback: () => any;
   onStart?: () => void;
   onStop?: () => void;
-} & StrictUnion<{ timer: number } | { cron: string }>;
+} & StrictUnion<
+  { cron: string; repetitions?: number } | { timer: Date | string | number }
+>;
 
 export type PredefinedJobs = Job[];

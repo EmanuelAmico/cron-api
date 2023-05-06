@@ -24,9 +24,10 @@ class JobsController {
     res: Response
   ) {
     try {
-      const { name, description, cron, timer, url, method, body } = req.body;
+      const { name, description, cron, repetitions, timer, url, method, body } =
+        req.body;
       validateParameters(
-        { name, description, cron, timer, url, method, body },
+        { name, description, cron, repetitions, timer, url, method, body },
         [
           {
             field: "name",
@@ -41,6 +42,11 @@ class JobsController {
             field: "cron",
             type: "string",
             atLeastOne: true,
+          },
+          {
+            field: "repetitions",
+            type: "number",
+            optional: true,
           },
           {
             field: "timer",
@@ -70,6 +76,7 @@ class JobsController {
           name,
           description,
           cron,
+          repetitions,
           url,
           method,
           body,

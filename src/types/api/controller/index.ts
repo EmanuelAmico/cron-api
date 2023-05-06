@@ -6,4 +6,6 @@ export type JobDescription = {
   url: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
-} & StrictUnion<{ cron: string } | { timer: number }>;
+} & StrictUnion<
+  { cron: string; repetitions?: number } | { timer: string | number }
+>;
