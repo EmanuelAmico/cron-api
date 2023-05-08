@@ -6,28 +6,60 @@ import {
   timeDifferenceInMs,
   timeRemaining,
 } from "../date";
+import { pick } from "../helpers";
 
 class Job implements IJob {
-  public name: string;
-  public description?: string;
-  public cron?: string;
+  private _name: string;
+  private _description?: string;
+  private _cron?: string;
   private cronJob?: CronJob;
-  public timer?: number;
+  private _timer?: number;
   private timeout?: NodeJS.Timeout;
-  public nextRunDate?: string;
-  public nextRunTimeRemaining?: {
+  private _nextRunDate?: string;
+  private _nextRunTimeRemaining?: {
     days: number;
     hours: number;
     minutes: number;
     seconds: number;
   };
-  public repetitions?: number;
-  public remainingRepetitions?: number;
+  private _repetitions?: number;
+  private _remainingRepetitions?: number;
+  private _executionTimes: number;
   private calculateNextRunTimeRemainingInterval?: NodeJS.Timer;
-  protected callback: () => void;
-  protected onStart?: () => void;
-  protected onStop?: () => void;
-  private static runningJobs: Job[] = [];
+  protected _callback: () => void;
+  private onStart?: () => void;
+  private onStop?: () => void;
+  public get name() {
+    return this._name;
+  }
+  public get description() {
+    return this._description;
+  }
+  public get cron() {
+    return this._cron;
+  }
+  public get timer() {
+    return this._timer;
+  }
+  public get nextRunDate() {
+    return this._nextRunDate;
+  }
+  public get nextRunTimeRemaining() {
+    return this._nextRunTimeRemaining;
+  }
+  public get repetitions() {
+    return this._repetitions;
+  }
+  public get remainingRepetitions() {
+    return this._remainingRepetitions;
+  }
+  public get executionTimes() {
+    return this._executionTimes;
+  }
+  public get callback() {
+    return this._callback;
+  }
+  protected static runningJobs: Job[] = [];
 
   constructor({
     name,
@@ -48,8 +80,9 @@ class Job implements IJob {
     if (timer && repetitions)
       throw new Error("Invalid job, timer jobs can't have repetitions.");
 
-    this.name = name;
-    this.callback = async () => {
+    this._name = name;
+    this._executionTimes = 0;
+    this._callback = async () => {
       try {
         console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
         const result = await callback();
@@ -58,11 +91,11 @@ class Job implements IJob {
         console.error(`Error executing job '${this.name}'`, error);
       }
     };
-    if (description) this.description = description;
-    if (cron) this.cron = cron;
-    if (this.repetitions) this.repetitions = repetitions;
+    if (description) this._description = description;
+    if (cron) this._cron = cron;
+    if (this.repetitions) this._repetitions = repetitions;
     if (timer)
-      this.timer =
+      this._timer =
         typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
     if (onStart) this.onStart = onStart;
     if (onStop) this.onStop = onStop;
@@ -77,16 +110,19 @@ class Job implements IJob {
   }
 
   public static listRunningJobs() {
-    return this.runningJobs.map((job) => ({
-      name: job.name,
-      description: job.description,
-      cron: job.cron,
-      repetitions: job.repetitions,
-      remainingRepetitions: job.remainingRepetitions,
-      timer: job.timer,
-      nextRunDate: job.nextRunDate,
-      nextRunTimeRemaining: job.nextRunTimeRemaining,
-    }));
+    return this.runningJobs.map((job) =>
+      pick(job, [
+        "name",
+        "description",
+        "cron",
+        "timer",
+        "nextRunDate",
+        "nextRunTimeRemaining",
+        "repetitions",
+        "remainingRepetitions",
+        "executionTimes",
+      ])
+    );
   }
 
   public static searchJob(name: string) {
@@ -94,10 +130,10 @@ class Job implements IJob {
   }
 
   public start() {
-    if (this.cron) {
+    if (this._cron) {
       this.cronJob = new CronJob(
-        this.cron,
-        this.callback,
+        this._cron,
+        this._callback,
         null,
         true,
         "America/Argentina/Buenos_Aires"
@@ -105,40 +141,35 @@ class Job implements IJob {
 
       const nextRunDate = new Date(this.cronJob.nextDate().toJSDate());
       const nextRunTimeRemaining = timeRemaining(nextRunDate);
-      this.nextRunDate = formattedDate(nextRunDate);
-      this.nextRunTimeRemaining = nextRunTimeRemaining;
+      this._nextRunDate = formattedDate(nextRunDate);
+      this._nextRunTimeRemaining = nextRunTimeRemaining;
 
       this.cronJob.addCallback(() => {
+        this._executionTimes++;
         if (this.cronJob) {
           const nextRunDate = this.cronJob.nextDate().toJSDate();
-          this.nextRunDate = formattedDate(nextRunDate);
+          this._nextRunDate = formattedDate(nextRunDate);
         }
-        if (this.remainingRepetitions) this.remainingRepetitions--;
-        if (this.remainingRepetitions === 0) this.stop();
+        if (this._remainingRepetitions) this._remainingRepetitions--;
+        if (this._remainingRepetitions === 0) this.stop();
       });
+
       this.calculateNextRunTimeRemainingInterval = setInterval(() => {
         if (!this.cronJob)
           return clearInterval(this.calculateNextRunTimeRemainingInterval);
         const nextRunDate = new Date(this.cronJob.nextDate().toJSDate());
-        this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+        this._nextRunTimeRemaining = timeRemaining(nextRunDate);
       }, 1000);
-
-      // this.calculateNextRunInterval = setInterval(() => {
-      //   if (!this.cronJob) return clearInterval(this.calculateNextRunInterval);
-      //   const nextRunDate = new Date(this.cronJob.nextDate().toJSDate());
-      //   this.nextRunDate = formattedDate(nextRunDate);
-      //   this.nextRunTimeRemaining = timeRemaining(nextRunDate);
-      // }, timeDifferenceInMs(nextRunDate) + 1000);
     }
 
-    if (this.timer) {
+    if (this._timer) {
       this.timeout = setTimeout(() => {
-        this.callback();
+        this._callback();
         this.stop();
       }, this.timer);
-      const nextRunDate = new Date(Date.now() + this.timer);
-      this.nextRunDate = formattedDate(nextRunDate);
-      this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+      const nextRunDate = new Date(Date.now() + this._timer);
+      this._nextRunDate = formattedDate(nextRunDate);
+      this._nextRunTimeRemaining = timeRemaining(nextRunDate);
     }
 
     if (this.constructor === Job) Job.runningJobs.push(this);
@@ -146,13 +177,13 @@ class Job implements IJob {
   }
 
   public stop() {
-    if (this.cron && this.cronJob) {
+    if (this._cron && this.cronJob) {
       this.cronJob.stop();
       if (this.calculateNextRunTimeRemainingInterval)
         clearInterval(this.calculateNextRunTimeRemainingInterval);
     }
 
-    if (this.timer && this.timeout) {
+    if (this._timer && this.timeout) {
       clearTimeout(this.timeout);
     }
 
@@ -162,24 +193,36 @@ class Job implements IJob {
 
   public edit({
     name,
+    description,
     cron,
     timer,
+    repetitions,
     callback,
   }: Partial<Pick<JobData, "callback">> & Omit<JobData, "callback">) {
-    if (this.cron && this.cronJob) {
+    if (this._cron && this.cronJob) {
       if (!cron) throw new Error("No cron provided");
-      this.name = name;
+      this._name = name;
       this.cronJob.setTime(new CronTime(cron));
-      this.cron = cron;
-      if (callback) this.callback = callback;
+      this._cron = cron;
+      if (description) this._description = description;
+      if (repetitions) {
+        if (this._executionTimes > repetitions)
+          throw new Error(
+            "Invalid repetitions, can't be less than the execution times."
+          );
+        this._repetitions = repetitions;
+        this._remainingRepetitions = repetitions - this._executionTimes;
+      }
+      if (callback) this._callback = callback;
     }
 
     if (this.timer && this.timeout) {
       if (!timer) throw new Error("No timer provided");
-      this.name = name;
-      this.timer =
+      this._name = name;
+      this._timer =
         typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
-      if (callback) this.callback = callback;
+
+      if (callback) this._callback = callback;
     }
 
     return this;

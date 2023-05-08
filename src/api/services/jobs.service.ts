@@ -8,7 +8,7 @@ class JobService {
     return [...jobs, ...axiosJobs];
   }
 
-  public static createJob<BodyType, ResponseType>({
+  public static createJob({
     name,
     cron,
     timer,
@@ -17,11 +17,11 @@ class JobService {
     body,
     headers,
   }: Omit<
-    ConstructorParameters<typeof AxiosJob<BodyType, ResponseType>>[0],
+    ConstructorParameters<typeof AxiosJob>[0],
     "instance" | "onStart" | "onStop"
   >) {
     if (cron) {
-      const job = new AxiosJob<BodyType, ResponseType>({
+      const job = new AxiosJob({
         name,
         cron,
         url,
@@ -34,7 +34,7 @@ class JobService {
     }
 
     if (timer) {
-      const job = new AxiosJob<BodyType, ResponseType>({
+      const job = new AxiosJob({
         name,
         timer,
         url,
@@ -47,7 +47,7 @@ class JobService {
     }
   }
 
-  public static editJob<BodyType, ResponseType>({
+  public static editJob({
     name,
     description,
     cron,
@@ -57,9 +57,7 @@ class JobService {
     method,
     body,
     instance,
-  }: Parameters<
-    InstanceType<typeof AxiosJob<BodyType, ResponseType>>["edit"]
-  >[0]) {
+  }: Parameters<InstanceType<typeof AxiosJob>["edit"]>[0]) {
     const job = AxiosJob.searchJob(name);
 
     if (!job) throw new Error("AxiosJob not found");
