@@ -286,29 +286,30 @@ class Job implements IJob {
     name,
     description,
     cron,
-    timer,
     repetitions,
+    timer,
     callback,
   }: Partial<Pick<JobData, "callback">> & Omit<JobData, "callback">) {
     if (this.cron && this.cronJob) {
-      if (!cron) throw new Error("No cron provided");
+      if (!cron) throw new Error("No cron provided.");
       this.name = name;
       this.cronJob.setTime(new CronTime(cron));
       this.cron = cron;
       if (description) this.description = description;
       if (repetitions) {
-        if (this.executionTimes > repetitions)
+        if (repetitions <= this.executionTimes)
           throw new Error(
-            "Invalid repetitions, can't be less than the execution times."
+            "Invalid job, repetitions must be greater than execution times."
           );
         this.repetitions = repetitions;
         this.remainingRepetitions = repetitions - this.executionTimes;
+        if (this.remainingRepetitions === 0) this.stop();
       }
       if (callback) this.callback = callback;
     }
 
     if (this.timer && this.timeout) {
-      if (!timer) throw new Error("No timer provided");
+      if (!timer) throw new Error("No timer provided.");
       this.name = name;
       this.timer =
         typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));

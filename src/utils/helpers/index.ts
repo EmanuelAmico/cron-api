@@ -73,6 +73,8 @@ export const filterSimilar = (
   similarityThreshold = 6
 ): string[] => {
   return arr.filter(
-    (item) => levenshteinDistance(target, item) <= similarityThreshold
+    (item) =>
+      levenshteinDistance(target, item) <= similarityThreshold ||
+      item.includes(target)
   );
 };

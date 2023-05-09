@@ -168,7 +168,9 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
 
   public edit({
     name,
+    description,
     cron,
+    repetitions,
     timer,
     url: urlString,
     query,
@@ -193,11 +195,11 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       : undefined;
 
     if (cron) {
-      super.edit({ name, cron, callback });
+      super.edit({ name, description, cron, repetitions, callback });
     }
 
     if (timer) {
-      super.edit({ name, timer, callback });
+      super.edit({ name, description, timer, callback });
     }
 
     if (urlString) {
