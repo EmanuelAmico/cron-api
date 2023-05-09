@@ -5,36 +5,54 @@ import { Job } from ".";
 import { pick } from "../helpers";
 
 class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
-  private _url: URL;
-  private _method: Method;
-  private _headers?: { [key: string]: string };
-  private _query?: { [key: string]: string };
-  private _body?: BodyType;
+  #url: URL;
+  #method: Method;
+  #headers?: { [key: string]: string };
+  #query?: { [key: string]: string };
+  #body?: BodyType;
   public get url() {
-    return this._url;
+    return this.#url;
+  }
+  private set url(url: URL) {
+    this.#url = url;
   }
   public get method() {
-    return this._method;
+    return this.#method;
+  }
+  private set method(method: Method) {
+    this.#method = method;
   }
   public get headers() {
-    return this._headers;
+    return this.#headers;
+  }
+  private set headers(headers: { [key: string]: string } | undefined) {
+    this.#headers = headers;
   }
   public get query() {
-    return this._query;
+    return this.#query;
+  }
+  private set query(query: { [key: string]: string } | undefined) {
+    this.#query = query;
   }
   public get body() {
-    return this._body as BodyType extends undefined ? undefined : BodyType;
+    return this.#body;
   }
-  public get callback() {
-    return this._callback as () => Promise<
-      ResponseType extends undefined ? unknown : ResponseType
-    >;
+  private set body(body: BodyType | undefined) {
+    this.#body = body;
   }
-  protected static runningJobs: AxiosJob[] = [];
+  static #runningJobs: AxiosJob[] = [];
+  protected static get runningJobs() {
+    return this.#runningJobs;
+  }
+  private static set runningJobs(jobs: AxiosJob[]) {
+    this.#runningJobs = jobs;
+  }
 
   constructor({
     name,
+    description,
     cron,
+    repetitions,
     timer,
     url: urlString,
     method,
@@ -44,16 +62,18 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     onStart: handleStart,
     onStop: handleStop,
     instance,
-  }: {
-    url: string;
-    query?: { [key: string]: string };
-    method: Method;
-    body?: BodyType;
-  } & StrictUnion<
-    | { headers?: { [key: string]: string } }
-    | { instance?: ReturnType<typeof generateInstance> }
-  > &
-    Omit<JobData, "callback">) {
+  }: Omit<ConstructorParameters<typeof Job>[0], "callback"> &
+    StrictUnion<
+      { cron: string; repetitions?: number } | { timer: Date | string | number }
+    > & {
+      url: string;
+      query?: { [key: string]: string };
+      method: Method;
+      body?: BodyType;
+    } & StrictUnion<
+      | { headers?: { [key: string]: string } }
+      | { instance?: ReturnType<typeof generateInstance> }
+    >) {
     if (AxiosJob.runningJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
@@ -88,8 +108,23 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
 
     super(
       cron
-        ? { name, cron, callback, onStart, onStop }
-        : { name, timer: timer as number, callback, onStart, onStop }
+        ? {
+            name,
+            description,
+            cron,
+            repetitions,
+            callback,
+            onStart,
+            onStop,
+          }
+        : {
+            name,
+            description,
+            timer: timer as Date | string | number,
+            callback,
+            onStart,
+            onStop,
+          }
     );
 
     const url = new URL(urlString);
@@ -99,41 +134,36 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
         const value = query[key];
         url.searchParams.append(key, value);
       }
-      this._query = query;
+      this.query = query;
     }
 
-    if (body) this._body = body;
-    this._url = url;
-    this._method = method;
+    if (body) this.body = body;
+    this.#url = url;
+    this.#method = method;
   }
 
   public static listRunningJobs() {
-    const jobsWithSuperProperties = super.listRunningJobs() as Pick<
-      AxiosJob,
-      | "cron"
-      | "repetitions"
-      | "timer"
-      | "name"
-      | "description"
-      | "nextRunDate"
-      | "nextRunTimeRemaining"
-      | "remainingRepetitions"
-      | "executionTimes"
-    >[];
-    const jobsWithThisProperties = this.runningJobs.map((job) =>
-      pick(job, ["url", "method", "headers", "query", "body"])
-    );
-
-    return jobsWithSuperProperties.map((job, index) => ({
-      ...job,
-      ...jobsWithThisProperties[index],
-    }));
+    return super.listRunningJobs() as AxiosJob[];
   }
 
-  public static searchJob<BodyType = unknown, ResponseType = unknown>(
+  public static getJobByName<BodyType = unknown, ResponseType = unknown>(
     name: string
   ) {
-    return super.searchJob(name) as AxiosJob<BodyType, ResponseType>;
+    return super.getJobByName(name) as
+      | AxiosJob<BodyType, ResponseType>
+      | undefined;
+  }
+
+  public static findSimilarJob<BodyType = unknown, ResponseType = unknown>(
+    name: string
+  ) {
+    return super.findSimilarJob(name) as
+      | AxiosJob<BodyType, ResponseType>
+      | undefined;
+  }
+
+  public static findSimilarJobs(name: string) {
+    return super.findSimilarJobs(name) as AxiosJob[];
   }
 
   public edit({
@@ -174,7 +204,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       const url = new URL(urlString);
 
       if (query) {
-        this._query = query;
+        this.query = query;
         for (const key in query) {
           const value = query[key];
           url.searchParams.append(key, value);
@@ -182,10 +212,17 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       }
     }
 
-    if (method) this._method = method;
-    if (body) this._body = body;
+    if (method) this.method = method;
+    if (body) this.body = body;
 
     return this;
+  }
+
+  public toJSON() {
+    return {
+      ...super.toJSON(),
+      ...pick(this, ["url", "method", "headers", "query", "body"]),
+    };
   }
 }
 

@@ -9,6 +9,7 @@ type StrictUnionHelper<T, TAll> = T extends any
 
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
 
+export type Query = Record<string, string | number | boolean | undefined>;
 export interface BODY_RESPONSE<T> extends Response {
   error: unknown;
   message: string;

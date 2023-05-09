@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { JobService } from "../services";
 import { JobDescription } from "../../types/api";
@@ -11,6 +10,36 @@ class JobsController {
   ) {
     try {
       const jobs = JobService.listRunningJobs();
+
+      res.status(200).send({ jobs });
+    } catch (err) {
+      const error = err as Error;
+      res.status(500).send({ message: error.message });
+    }
+  }
+
+  public static getJob(
+    req: Request<{ name: string }, void, void, void>,
+    res: Response
+  ) {
+    try {
+      const { name } = req.params;
+      const job = JobService.getJob(name);
+
+      res.status(200).send({ job });
+    } catch (err) {
+      const error = err as Error;
+      res.status(500).send({ message: error.message });
+    }
+  }
+
+  public static searchJobs(
+    req: Request<{ name: string }, void, void, void>,
+    res: Response
+  ) {
+    try {
+      const { name } = req.params;
+      const jobs = JobService.searchJobs(name);
 
       res.status(200).send({ jobs });
     } catch (err) {
@@ -69,32 +98,18 @@ class JobsController {
         ]
       );
 
-      if (!cron && !timer) throw new Error("No cron or timer provided.");
+      JobService.createJob({
+        name,
+        description,
+        cron,
+        timer,
+        repetitions,
+        url,
+        method,
+        body,
+      });
 
-      if (cron) {
-        JobService.createJob({
-          name,
-          description,
-          cron,
-          repetitions,
-          url,
-          method,
-          body,
-        });
-      }
-
-      if (timer) {
-        JobService.createJob({
-          name,
-          description,
-          timer,
-          url,
-          method,
-          body,
-        });
-      }
-
-      res.status(200).send({ message: "Job created." });
+      res.status(200).send({ message: "Job was created successfully." });
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });
@@ -164,7 +179,7 @@ class JobsController {
         });
       }
 
-      res.status(200).send({ message: "Job edited." });
+      res.status(200).send({ message: "Job was edited successfully." });
     } catch (err) {
       const error = err as Error;
       res.status(500).send({ message: error.message });
