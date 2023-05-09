@@ -1,3 +1,4 @@
+import { Method } from "axios";
 import { Job, AxiosJob } from "../../utils";
 
 class JobService {
@@ -15,9 +16,39 @@ class JobService {
     return axiosJob?.toJSON() || job?.toJSON();
   }
 
-  public static searchJobs(name: string) {
-    const jobs = Job.findSimilarJobs(name);
-    const axiosJobs = AxiosJob.findSimilarJobs(name);
+  public static findSimilarJobs({
+    name,
+    description,
+    cron,
+    repetitions,
+    nextRunDate,
+    url,
+    method,
+  }: {
+    name?: string;
+    description?: string;
+    cron?: string;
+    repetitions?: number;
+    nextRunDate?: string;
+    url?: string;
+    method?: Method;
+  }) {
+    const jobs = Job.findSimilarJobs({
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+    });
+    const axiosJobs = AxiosJob.findSimilarJobs({
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+      url,
+      method,
+    });
 
     return [...jobs, ...axiosJobs].map((job) => job.toJSON());
   }

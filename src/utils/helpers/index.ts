@@ -69,12 +69,14 @@ export const findMostSimilar = (input: string, candidates: string[]) => {
 
 export const filterSimilar = (
   target: string,
-  arr: string[],
+  arr: (string | undefined)[],
   similarityThreshold = 6
 ): string[] => {
-  return arr.filter(
-    (item) =>
-      levenshteinDistance(target, item) <= similarityThreshold ||
-      item.includes(target)
-  );
+  return arr
+    .filter((item): item is string => item !== undefined)
+    .filter(
+      (item) =>
+        levenshteinDistance(target, item) <= similarityThreshold ||
+        item.includes(target)
+    );
 };

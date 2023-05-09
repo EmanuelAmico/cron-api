@@ -211,13 +211,83 @@ class Job implements IJob {
     return this.getJobByName(mostSimilarJobName);
   }
 
-  public static findSimilarJobs(name: string) {
-    const similarJobNames = filterSimilar(
-      name,
-      this.runningJobs.map((job) => job.name)
-    );
+  public static findSimilarJobs({
+    name,
+    description,
+    cron,
+    repetitions,
+    nextRunDate,
+  }: {
+    name?: string;
+    description?: string;
+    cron?: string;
+    repetitions?: number;
+    nextRunDate?: string;
+  }) {
+    const similarJobs: Job[] = [];
 
-    return this.runningJobs.filter((job) => similarJobNames.includes(job.name));
+    if (name) {
+      const similarJobNames = filterSimilar(
+        name,
+        this.runningJobs.map((job) => job.name)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) => similarJobNames.includes(job.name))
+      );
+    }
+
+    if (description) {
+      const similarJobDescriptions = filterSimilar(
+        description,
+        this.runningJobs.map((job) => job.description)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobDescriptions.includes(job.description || "")
+        )
+      );
+    }
+
+    if (cron) {
+      const similarJobCrons = filterSimilar(
+        cron,
+        this.runningJobs.map((job) => job.cron)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobCrons.includes(job.cron || "")
+        )
+      );
+    }
+
+    if (repetitions) {
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          job.repetitions ? job.repetitions === repetitions : false
+        )
+      );
+    }
+
+    if (nextRunDate) {
+      const similarJobNextRunDates = filterSimilar(
+        nextRunDate,
+        this.runningJobs.map((job) => job.nextRunDate)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobNextRunDates.includes(job.nextRunDate || "")
+        )
+      );
+    }
+
+    // Remove duplicates
+    return similarJobs.filter(
+      (job, index, jobs) => jobs.findIndex((j) => j.name === job.name) === index
+    );
   }
 
   public start() {
