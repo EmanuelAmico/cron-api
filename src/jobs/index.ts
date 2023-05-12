@@ -1,18 +1,17 @@
 import { PredefinedJobs } from "../types";
 import { Job } from "../utils";
 
-const jobs: PredefinedJobs = [];
+const jobs: PredefinedJobs = [
+  new Job({
+    name: "example-job",
+    cron: "* * * * *",
+    callback: () => {
+      //NOTE Every minute it will log current date
+      return new Date();
+    },
+  }),
+];
 
-const exampleJob = new Job({
-  name: "example-job",
-  cron: "* * * * *",
-  callback: () => {
-    //NOTE Every minute it will log current date
-    return new Date();
-  },
-});
-
-jobs.push(exampleJob);
 jobs.forEach((job) => job.start());
 
 console.log(

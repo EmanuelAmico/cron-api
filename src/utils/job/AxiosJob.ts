@@ -93,9 +93,6 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
             body: this.body,
           });
 
-    if (!cron && !timer)
-      throw new Error("Invalid job, must have cron or timer.");
-
     const onStart = () => {
       AxiosJob.runningJobs.push(this);
       if (handleStart) handleStart();
@@ -270,6 +267,14 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     if (body) this.body = body;
 
     return this;
+  }
+
+  public stop() {
+    super.stop();
+    if (this.constructor === AxiosJob)
+      AxiosJob.runningJobs = AxiosJob.runningJobs.filter(
+        (job) => job.name !== this.name
+      );
   }
 
   public toJSON() {

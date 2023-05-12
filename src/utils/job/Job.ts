@@ -348,7 +348,8 @@ class Job implements IJob {
       clearTimeout(this.timeout);
     }
 
-    Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
+    if (this.constructor === Job)
+      Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
     if (this.onStop) this.onStop();
   }
 

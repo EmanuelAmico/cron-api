@@ -1,4 +1,5 @@
-import { Job } from "../../utils";
+import { AxiosJob, Job } from "../../utils";
+import { SQSJob } from "../../utils/job/SQSJob";
 import { StrictUnion } from "../helpers";
 
 export interface IJob {
@@ -21,4 +22,4 @@ export type JobData = {
   { cron: string; repetitions?: number } | { timer: Date | string | number }
 >;
 
-export type PredefinedJobs = Job[];
+export type PredefinedJobs = (Job | AxiosJob | SQSJob)[];
