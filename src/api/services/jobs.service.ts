@@ -1,25 +1,67 @@
+import { Method } from "axios";
+import { StrictUnion } from "../../types";
 import { Job, AxiosJob } from "../../utils";
+import { SQSJob } from "../../utils/job/SQSJob";
 
 class JobService {
   public static listRunningJobs() {
     const jobs = Job.listRunningJobs();
     const axiosJobs = AxiosJob.listRunningJobs();
+    const sqsJobs = SQSJob.listRunningJobs();
 
-    return [...jobs, ...axiosJobs].map((job) => job.toJSON());
+    return [...jobs, ...axiosJobs, ...sqsJobs].map((job) => job.toJSON());
   }
 
   public static getJob(name: string) {
     const job = Job.getJobByName(name);
     const axiosJob = AxiosJob.getJobByName(name);
+    const sqsJob = SQSJob.getJobByName(name);
 
-    return axiosJob?.toJSON() || job?.toJSON();
+    return axiosJob?.toJSON() || job?.toJSON() || sqsJob?.toJSON();
   }
 
-  public static searchJobs(name: string) {
-    const jobs = Job.findSimilarJobs(name);
-    const axiosJobs = AxiosJob.findSimilarJobs(name);
+  public static findSimilarJobs({
+    name,
+    description,
+    cron,
+    repetitions,
+    nextRunDate,
+    url,
+    method,
+  }: {
+    name?: string;
+    description?: string;
+    cron?: string;
+    repetitions?: number;
+    nextRunDate?: string;
+    url?: string;
+    method?: Method;
+  }) {
+    const jobs = Job.findSimilarJobs({
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+    });
+    const axiosJobs = AxiosJob.findSimilarJobs({
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+      url,
+      method,
+    });
+    const sqsJobs = SQSJob.findSimilarJobs({
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+    });
 
-    return [...jobs, ...axiosJobs].map((job) => job.toJSON());
+    return [...jobs, ...axiosJobs, ...sqsJobs].map((job) => job.toJSON());
   }
 
   public static createJob({
@@ -32,37 +74,106 @@ class JobService {
     method,
     body,
     headers,
-  }: Omit<
-    ConstructorParameters<typeof AxiosJob>[0],
-    "instance" | "onStart" | "onStop"
+    queueUrl,
+    queueType,
+    messageGroupId,
+    messageDeduplicationId,
+  }: StrictUnion<
+    | Omit<
+        ConstructorParameters<typeof AxiosJob>[0],
+        "instance" | "onStart" | "onStop"
+      >
+    | Omit<ConstructorParameters<typeof SQSJob>[0], "onStart" | "onStop">
   >) {
     if (cron) {
-      const job = new AxiosJob({
-        name,
-        description,
-        cron,
-        repetitions,
-        url,
-        method,
-        body,
-        headers,
-      });
+      if (url && method) {
+        const job = new AxiosJob({
+          name,
+          description,
+          cron,
+          repetitions,
+          url,
+          method,
+          body,
+          headers,
+        });
 
-      job.start();
+        job.start();
+      }
+
+      if (queueType === "fifo" && messageDeduplicationId && messageGroupId) {
+        const job = new SQSJob({
+          name,
+          description,
+          cron,
+          repetitions,
+          queueUrl,
+          queueType,
+          messageGroupId,
+          messageDeduplicationId,
+          body,
+        });
+
+        job.start();
+      }
+
+      if (queueType === "standard") {
+        const job = new SQSJob({
+          name,
+          description,
+          cron,
+          repetitions,
+          queueUrl,
+          queueType,
+          body,
+        });
+
+        job.start();
+      }
     }
 
     if (timer) {
-      const job = new AxiosJob({
-        name,
-        description,
-        timer,
-        url,
-        method,
-        body,
-        headers,
-      });
+      if (url && method) {
+        const job = new AxiosJob({
+          name,
+          description,
+          timer,
+          url,
+          method,
+          body,
+          headers,
+        });
 
-      job.start();
+        job.start();
+      }
+
+      if (queueType === "fifo" && messageDeduplicationId && messageGroupId) {
+        const job = new SQSJob({
+          name,
+          description,
+          timer,
+          queueUrl,
+          queueType,
+          messageGroupId,
+          messageDeduplicationId,
+          body,
+        });
+
+        job.start();
+      }
+
+      if (queueType === "standard") {
+        const job = new SQSJob({
+          name,
+          description,
+          timer,
+          queueUrl,
+          queueType,
+          body,
+        });
+
+        job.start();
+      }
     }
   }
 
@@ -77,29 +188,70 @@ class JobService {
     method,
     body,
     instance,
-  }: Parameters<InstanceType<typeof AxiosJob>["edit"]>[0]) {
-    const job = AxiosJob.getJobByName(name);
+    queueUrl,
+    queueType,
+    messageGroupId,
+    messageDeduplicationId,
+  }: Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
+    Parameters<InstanceType<typeof SQSJob>["edit"]>[0]) {
+    const job =
+      Job.getJobByName(name) ||
+      AxiosJob.getJobByName(name) ||
+      SQSJob.getJobByName(name);
 
-    if (!job) throw new Error("AxiosJob not found");
+    if (!job) throw new Error("Job not found");
 
-    job.edit({
-      name,
-      description,
-      cron,
-      repetitions,
-      timer,
-      url,
-      query,
-      method,
-      body,
-      instance,
-    });
+    if (job instanceof AxiosJob) {
+      job.edit({
+        name,
+        description,
+        cron,
+        repetitions,
+        timer,
+        url,
+        query,
+        method,
+        body,
+        instance,
+      });
+    }
+
+    if (job instanceof SQSJob) {
+      if (queueType === "fifo") {
+        job.edit({
+          name,
+          description,
+          cron,
+          repetitions,
+          timer,
+          queueUrl,
+          queueType,
+          messageGroupId,
+          messageDeduplicationId,
+        });
+      }
+
+      if (queueType === "standard") {
+        job.edit({
+          name,
+          description,
+          cron,
+          repetitions,
+          timer,
+          queueUrl,
+          queueType,
+        });
+      }
+    }
   }
 
   public static deleteJob({ name }: { name: string }) {
-    const job = AxiosJob.getJobByName(name);
+    const job =
+      Job.getJobByName(name) ||
+      AxiosJob.getJobByName(name) ||
+      SQSJob.getJobByName(name);
 
-    if (!job) throw new Error("AxiosJob not found");
+    if (!job) throw new Error("Job not found");
 
     job.stop();
   }

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { JobService } from "../services";
 import { JobDescription } from "../../types/api";
 import { validateParameters } from "../helpers/validateParameters";
+import { Method } from "axios";
 
 class JobsController {
   public static listRunningJobs(
@@ -33,13 +34,74 @@ class JobsController {
     }
   }
 
-  public static searchJobs(
-    req: Request<{ name: string }, void, void, void>,
+  public static findSimilarJobs(
+    req: Request<
+      void,
+      void,
+      void,
+      {
+        name: string;
+        description: string;
+        cron: string;
+        repetitions: number;
+        nextRunDate: string;
+        url: string;
+        method: Method;
+      }
+    >,
     res: Response
   ) {
     try {
-      const { name } = req.params;
-      const jobs = JobService.searchJobs(name);
+      validateParameters(req.query, [
+        {
+          field: "name",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "description",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "cron",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "repetitions",
+          type: "number",
+          atLeastOne: true,
+        },
+        {
+          field: "nextRunDate",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "url",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "method",
+          type: "string",
+          atLeastOne: true,
+        },
+      ]);
+
+      const { name, description, cron, repetitions, nextRunDate, url, method } =
+        req.query;
+
+      const jobs = JobService.findSimilarJobs({
+        name,
+        description,
+        cron,
+        repetitions,
+        nextRunDate,
+        url,
+        method,
+      });
 
       res.status(200).send({ jobs });
     } catch (err) {

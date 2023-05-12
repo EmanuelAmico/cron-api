@@ -2,7 +2,7 @@ import { generateInstance } from "../axios";
 import { Method } from "axios";
 import { JobData, StrictUnion } from "../../types";
 import { Job } from ".";
-import { pick } from "../helpers";
+import { filterSimilar, pick } from "../helpers";
 
 class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
   #url: URL;
@@ -93,9 +93,6 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
             body: this.body,
           });
 
-    if (!cron && !timer)
-      throw new Error("Invalid job, must have cron or timer.");
-
     const onStart = () => {
       AxiosJob.runningJobs.push(this);
       if (handleStart) handleStart();
@@ -162,8 +159,60 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       | undefined;
   }
 
-  public static findSimilarJobs(name: string) {
-    return super.findSimilarJobs(name) as AxiosJob[];
+  public static findSimilarJobs({
+    name,
+    description,
+    cron,
+    repetitions,
+    nextRunDate,
+    url,
+    method,
+  }: {
+    name?: string;
+    description?: string;
+    cron?: string;
+    repetitions?: number;
+    nextRunDate?: string;
+    url?: string;
+    method?: Method;
+  }) {
+    const similarJobs: AxiosJob[] = [];
+
+    if (name || description || cron || repetitions || nextRunDate) {
+      similarJobs.push(
+        ...(super.findSimilarJobs({
+          name,
+          description,
+          cron,
+          repetitions,
+          nextRunDate,
+        }) as AxiosJob[])
+      );
+    }
+
+    if (url) {
+      const similarJobNames = filterSimilar(
+        url,
+        this.runningJobs.map((job) => job.url.href)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobNames.includes(job.url.href)
+        )
+      );
+    }
+
+    if (method) {
+      similarJobs.push(
+        ...this.runningJobs.filter((job) => job.method === method)
+      );
+    }
+
+    // Remove duplicates
+    return similarJobs.filter(
+      (job, index, jobs) => jobs.findIndex((j) => j.name === job.name) === index
+    );
   }
 
   public edit({
@@ -218,6 +267,14 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     if (body) this.body = body;
 
     return this;
+  }
+
+  public stop() {
+    super.stop();
+    if (this.constructor === AxiosJob)
+      AxiosJob.runningJobs = AxiosJob.runningJobs.filter(
+        (job) => job.name !== this.name
+      );
   }
 
   public toJSON() {

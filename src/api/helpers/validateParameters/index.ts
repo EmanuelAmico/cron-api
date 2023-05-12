@@ -19,6 +19,7 @@ const checkAtLeastOneParameter = (
   body: Request["body"] | Request["query"],
   parameters: string[]
 ) => {
+  if (!parameters.length) return;
   if (parameters.every((parameter) => body[parameter] === undefined))
     throw new Api400Error(
       `At least one of the following parameters must be provided: ${parameters.join(
