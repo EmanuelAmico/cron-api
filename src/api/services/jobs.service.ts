@@ -214,7 +214,7 @@ class JobService {
     queueType,
     messageGroupId,
     messageDeduplicationId,
-  }: Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
+  }: { name: string } & Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
     Parameters<InstanceType<typeof SQSJob>["edit"]>[0]) {
     const job =
       Job.getJobByName(name) ||
@@ -224,45 +224,86 @@ class JobService {
     if (!job) throw new Error("Job not found");
 
     if (job instanceof AxiosJob) {
-      job.edit({
-        name,
-        description,
-        cron,
-        repetitions,
-        timer,
-        url,
-        query,
-        method,
-        body,
-        instance,
-      });
+      if (timer) {
+        job.edit({
+          name,
+          description,
+          repetitions,
+          timer,
+          url,
+          query,
+          method,
+          body,
+          instance,
+        });
+      }
+
+      if (cron) {
+        job.edit({
+          name,
+          description,
+          cron,
+          repetitions,
+          url,
+          query,
+          method,
+          body,
+          instance,
+        });
+      }
     }
 
     if (job instanceof SQSJob) {
       if (queueType === "fifo") {
-        job.edit({
-          name,
-          description,
-          cron,
-          repetitions,
-          timer,
-          queueUrl,
-          queueType,
-          messageGroupId,
-          messageDeduplicationId,
-        });
+        if (timer) {
+          job.edit({
+            name,
+            description,
+            repetitions,
+            timer,
+            queueUrl,
+            queueType,
+            messageGroupId,
+            messageDeduplicationId,
+          });
+        }
+
+        if (cron) {
+          job.edit({
+            name,
+            description,
+            cron,
+            repetitions,
+            queueUrl,
+            queueType,
+            messageGroupId,
+            messageDeduplicationId,
+          });
+        }
       }
 
       if (queueType === "standard") {
-        job.edit({
-          name,
-          description,
-          cron,
-          repetitions,
-          timer,
-          queueUrl,
-          queueType,
-        });
+        if (timer) {
+          job.edit({
+            name,
+            description,
+            repetitions,
+            timer,
+            queueUrl,
+            queueType,
+          });
+        }
+
+        if (cron) {
+          job.edit({
+            name,
+            description,
+            cron,
+            repetitions,
+            queueUrl,
+            queueType,
+          });
+        }
       }
     }
   }
