@@ -4,7 +4,7 @@ import { ICourseInformation, IEmailParams } from "../../../../types";
 import { sqs } from "..";
 import ExternalError from "../../../helpers/errorHandlers/External/externalErrors";
 
-const reasonMapper: { [key: string]: string } = {
+const reasonMapper: Record<string, string> = {
   cc_rejected_insufficient_amount: "Fondos insuficientes",
   cc_rejected_bad_filled_security_code: "Código de seguridad inválido",
   cc_rejected_bad_filled_date: "Problema con fecha de vencimiento",

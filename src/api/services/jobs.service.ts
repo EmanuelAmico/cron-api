@@ -26,16 +26,28 @@ class JobService {
     cron,
     repetitions,
     nextRunDate,
+    createdAt,
+    updatedAt,
     url,
     method,
+    queueUrl,
+    queueType,
+    messageGroupId,
+    messageDeduplicationId,
   }: {
     name?: string;
     description?: string;
     cron?: string;
     repetitions?: number;
     nextRunDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
     url?: string;
     method?: Method;
+    queueUrl?: string;
+    queueType?: "fifo" | "standard";
+    messageGroupId?: string;
+    messageDeduplicationId?: string;
   }) {
     const jobs = Job.findSimilarJobs({
       name,
@@ -43,6 +55,8 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
     });
     const axiosJobs = AxiosJob.findSimilarJobs({
       name,
@@ -50,6 +64,8 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
       url,
       method,
     });
@@ -59,6 +75,12 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
+      queueUrl,
+      queueType,
+      messageGroupId,
+      messageDeduplicationId,
     });
 
     return [...jobs, ...axiosJobs, ...sqsJobs].map((job) => job.toJSON());

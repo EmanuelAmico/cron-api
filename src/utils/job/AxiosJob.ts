@@ -1,14 +1,17 @@
 import { generateInstance } from "../axios";
 import { Method } from "axios";
-import { JobData, StrictUnion } from "../../types";
+import { IAxiosJob, StrictUnion } from "../../types";
 import { Job } from ".";
 import { filterSimilar, pick } from "../helpers";
 
-class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
+class AxiosJob<BodyType = unknown, ResponseType = unknown>
+  extends Job
+  implements IAxiosJob
+{
   #url: URL;
   #method: Method;
-  #headers?: { [key: string]: string };
-  #query?: { [key: string]: string };
+  #headers?: Record<string, string>;
+  #query?: Record<string, string>;
   #body?: BodyType;
   public get url() {
     return this.#url;
@@ -25,13 +28,13 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
   public get headers() {
     return this.#headers;
   }
-  private set headers(headers: { [key: string]: string } | undefined) {
+  private set headers(headers: Record<string, string> | undefined) {
     this.#headers = headers;
   }
   public get query() {
     return this.#query;
   }
-  private set query(query: { [key: string]: string } | undefined) {
+  private set query(query: Record<string, string> | undefined) {
     this.#query = query;
   }
   public get body() {
@@ -67,11 +70,11 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       { cron: string; repetitions?: number } | { timer: Date | string | number }
     > & {
       url: string;
-      query?: { [key: string]: string };
+      query?: Record<string, string>;
       method: Method;
       body?: BodyType;
     } & StrictUnion<
-      | { headers?: { [key: string]: string } }
+      | { headers?: Record<string, string> }
       | { instance?: ReturnType<typeof generateInstance> }
     >) {
     if (AxiosJob.runningJobs.find((job) => job.name === name))
@@ -143,6 +146,10 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     return super.listRunningJobs() as AxiosJob[];
   }
 
+  public static stopJobs() {
+    super.stopJobs();
+  }
+
   public static getJobByName<BodyType = unknown, ResponseType = unknown>(
     name: string
   ) {
@@ -165,6 +172,8 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     cron,
     repetitions,
     nextRunDate,
+    createdAt,
+    updatedAt,
     url,
     method,
   }: {
@@ -173,12 +182,22 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     cron?: string;
     repetitions?: number;
     nextRunDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
     url?: string;
     method?: Method;
   }) {
     const similarJobs: AxiosJob[] = [];
 
-    if (name || description || cron || repetitions || nextRunDate) {
+    if (
+      name ||
+      description ||
+      cron ||
+      repetitions ||
+      nextRunDate ||
+      createdAt ||
+      updatedAt
+    ) {
       similarJobs.push(
         ...(super.findSimilarJobs({
           name,
@@ -186,6 +205,8 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
           cron,
           repetitions,
           nextRunDate,
+          createdAt,
+          updatedAt,
         }) as AxiosJob[])
       );
     }
@@ -209,10 +230,31 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
       );
     }
 
-    // Remove duplicates
-    return similarJobs.filter(
-      (job, index, jobs) => jobs.findIndex((j) => j.name === job.name) === index
+    const hasDuplicates = similarJobs.some(
+      (job, index, self) => self.findIndex((j) => j.name === job.name) !== index
     );
+
+    if (hasDuplicates)
+      return similarJobs
+        .filter(
+          (job, _, self) => self.filter((j) => j.name === job.name).length > 1
+        )
+        .filter(
+          (job, index, self) =>
+            self.findIndex((j) => job && j && j.name === job.name) === index
+        );
+
+    return [
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+      url,
+      method,
+    ].filter((value) => value).length > 1
+      ? []
+      : similarJobs;
   }
 
   public edit({
@@ -226,14 +268,13 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown> extends Job {
     method,
     body,
     instance,
-  }: {
+  }: Parameters<(typeof Job)["prototype"]["edit"]>[0] & {
     url?: string;
-    query?: { [key: string]: string };
+    query?: Record<string, string>;
     method: Method;
     body?: BodyType;
     instance?: ReturnType<typeof generateInstance>;
-  } & Pick<JobData, "name"> &
-    Partial<Omit<JobData, "name" | "callback">>) {
+  }) {
     const callback = instance
       ? async () =>
           await instance<ResponseType>({

@@ -1,25 +1,29 @@
 import { AxiosJob, Job } from "../../utils";
 import { SQSJob } from "../../utils/job/SQSJob";
-import { StrictUnion } from "../helpers";
 
+// The minimum and necessary to create a Job | AxiosJob | SQSJob
 export interface IJob {
   readonly name: string;
+  readonly description: string;
   readonly cron?: string;
   readonly timer?: number;
-  start(): void;
-  stop(): void;
-  edit(job: JobData): void;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
-export type JobData = {
-  name: string;
-  description?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  callback: () => any;
-  onStart?: () => void;
-  onStop?: () => void;
-} & StrictUnion<
-  { cron: string; repetitions?: number } | { timer: Date | string | number }
->;
+export interface IAxiosJob extends IJob {
+  readonly url: URL;
+  readonly method: string;
+  readonly headers?: Record<string, string>;
+  readonly body?: unknown;
+}
+
+export interface ISQSJob extends IJob {
+  readonly queueUrl: URL;
+  readonly queueType: "fifo" | "standard";
+  readonly messageGroupId?: string;
+  readonly messageDeduplicationId?: string;
+  readonly body: unknown;
+}
 
 export type PredefinedJobs = (Job | AxiosJob | SQSJob)[];
