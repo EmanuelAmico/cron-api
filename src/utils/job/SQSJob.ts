@@ -1,4 +1,4 @@
-import { JobData, StrictUnion } from "../../types";
+import { ISQSJob, StrictUnion } from "../../types";
 import { Job } from ".";
 import { filterSimilar, pick } from "../helpers";
 import { SQS } from "aws-sdk";
@@ -6,7 +6,7 @@ import { config } from "../../api/config";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 
-class SQSJob extends Job {
+class SQSJob extends Job implements ISQSJob {
   #queueUrl: URL;
   #queueType: "fifo" | "standard";
   #body: unknown;
@@ -156,6 +156,10 @@ class SQSJob extends Job {
     return super.listRunningJobs() as unknown as SQSJob[];
   }
 
+  public static stopJobs() {
+    super.stopJobs();
+  }
+
   public static getJobByName(name: string) {
     return super.getJobByName(name) as SQSJob | undefined;
   }
@@ -170,6 +174,8 @@ class SQSJob extends Job {
     cron,
     repetitions,
     nextRunDate,
+    createdAt,
+    updatedAt,
     queueUrl,
     queueType,
     messageGroupId,
@@ -180,6 +186,8 @@ class SQSJob extends Job {
     cron?: string;
     repetitions?: number;
     nextRunDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
     queueUrl?: string;
     queueType?: "fifo" | "standard";
     messageGroupId?: string;
@@ -187,7 +195,15 @@ class SQSJob extends Job {
   }) {
     const similarJobs: SQSJob[] = [];
 
-    if (name || description || cron || repetitions || nextRunDate) {
+    if (
+      name ||
+      description ||
+      cron ||
+      repetitions ||
+      nextRunDate ||
+      createdAt ||
+      updatedAt
+    ) {
       similarJobs.push(
         ...(super.findSimilarJobs({
           name,
@@ -195,6 +211,8 @@ class SQSJob extends Job {
           cron,
           repetitions,
           nextRunDate,
+          createdAt,
+          updatedAt,
         }) as SQSJob[])
       );
     }
@@ -244,10 +262,33 @@ class SQSJob extends Job {
       );
     }
 
-    // Remove duplicates
-    return similarJobs.filter(
-      (job, index, jobs) => jobs.findIndex((j) => j.name === job.name) === index
+    const hasDuplicates = similarJobs.some(
+      (job, index, self) => self.findIndex((j) => j.name === job.name) !== index
     );
+
+    if (hasDuplicates)
+      return similarJobs
+        .filter(
+          (job, _, self) => self.filter((j) => j.name === job.name).length > 1
+        )
+        .filter(
+          (job, index, self) =>
+            self.findIndex((j) => job && j && j.name === job.name) === index
+        );
+
+    return [
+      name,
+      description,
+      cron,
+      repetitions,
+      nextRunDate,
+      queueUrl,
+      queueType,
+      messageGroupId,
+      messageDeduplicationId,
+    ].filter((value) => value).length > 1
+      ? []
+      : similarJobs;
   }
 
   public edit({
@@ -261,23 +302,22 @@ class SQSJob extends Job {
     messageGroupId,
     messageDeduplicationId,
     body,
-  }: StrictUnion<
-    | {
-        body?: unknown;
-        messageGroupId?: string;
-        messageDeduplicationId?: string;
-      }
-    | {
-        body?: unknown;
-        queueType: "fifo";
-        queueUrl: string;
-        messageGroupId: string;
-        messageDeduplicationId: string;
-      }
-    | { body?: unknown; queueType: "standard"; queueUrl: string }
-  > &
-    Pick<JobData, "name"> &
-    Partial<Omit<JobData, "name" | "callback">>) {
+  }: Parameters<(typeof Job)["prototype"]["edit"]>[0] &
+    StrictUnion<
+      | {
+          body?: unknown;
+          messageGroupId?: string;
+          messageDeduplicationId?: string;
+        }
+      | {
+          body?: unknown;
+          queueType: "fifo";
+          queueUrl: string;
+          messageGroupId: string;
+          messageDeduplicationId: string;
+        }
+      | { body?: unknown; queueType: "standard"; queueUrl: string }
+    >) {
     if (cron) {
       super.edit({ name, description, cron, repetitions });
     }

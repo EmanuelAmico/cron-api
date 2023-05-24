@@ -6,7 +6,7 @@ export interface IFetchAPI {
   method: Method;
   body?: unknown;
   query?: string;
-  extraHeaders?: { [key: string]: string };
+  extraHeaders?: Record<string, string>;
   overrideToken?: string;
 }
 
@@ -17,7 +17,7 @@ export interface SimpleAxiosInstance {
 export interface AdvancedAxiosInstance extends SimpleAxiosInstance {
   header?: string;
   token?: string | null;
-  customHeaders?: { [key: string]: string };
+  customHeaders?: Record<string, string>;
 }
 
 export type IAxiosInstance = StrictUnion<

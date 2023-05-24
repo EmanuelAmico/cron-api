@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { JobService } from "../services";
 import { JobDescription } from "../../types/api";
-import { validateParameters } from "../helpers/validateParameters";
+import { checkProperties } from "../helpers/checkProperties";
 import { Method } from "axios";
 
 class JobsController {
@@ -40,19 +40,25 @@ class JobsController {
       void,
       void,
       {
-        name: string;
-        description: string;
-        cron: string;
-        repetitions: number;
-        nextRunDate: string;
-        url: string;
-        method: Method;
+        name?: string;
+        description?: string;
+        cron?: string;
+        repetitions?: string;
+        nextRunDate?: string;
+        createdAt?: string;
+        updatedAt?: string;
+        url?: string;
+        method?: Method;
+        queueUrl?: string;
+        queueType?: "fifo" | "standard";
+        messageGroupId?: string;
+        messageDeduplicationId?: string;
       }
     >,
     res: Response
   ) {
     try {
-      validateParameters(req.query, [
+      checkProperties(req.query, "req.query", [
         {
           field: "name",
           type: "string",
@@ -70,11 +76,21 @@ class JobsController {
         },
         {
           field: "repetitions",
-          type: "number",
+          type: "string",
           atLeastOne: true,
         },
         {
           field: "nextRunDate",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "createdAt",
+          type: "string",
+          atLeastOne: true,
+        },
+        {
+          field: "updatedAt",
           type: "string",
           atLeastOne: true,
         },
@@ -90,17 +106,36 @@ class JobsController {
         },
       ]);
 
-      const { name, description, cron, repetitions, nextRunDate, url, method } =
-        req.query;
-
-      const jobs = JobService.findSimilarJobs({
+      const {
         name,
         description,
         cron,
         repetitions,
         nextRunDate,
+        createdAt,
+        updatedAt,
         url,
         method,
+        queueUrl,
+        queueType,
+        messageGroupId,
+        messageDeduplicationId,
+      } = req.query;
+
+      const jobs = JobService.findSimilarJobs({
+        name,
+        description,
+        cron,
+        repetitions: repetitions ? parseInt(repetitions) : undefined,
+        nextRunDate,
+        createdAt,
+        updatedAt,
+        url,
+        method,
+        queueUrl,
+        queueType,
+        messageGroupId,
+        messageDeduplicationId,
       });
 
       res.status(200).send({ jobs });
@@ -115,10 +150,24 @@ class JobsController {
     res: Response
   ) {
     try {
-      const { name, description, cron, repetitions, timer, url, method, body } =
-        req.body;
-      validateParameters(
+      const {
+        name,
+        description,
+        cron,
+        repetitions,
+        timer,
+        url,
+        method,
+        body,
+        queueUrl,
+        queueType,
+        messageGroupId,
+        messageDeduplicationId,
+      } = req.body;
+
+      checkProperties(
         { name, description, cron, repetitions, timer, url, method, body },
+        "req.body",
         [
           {
             field: "name",
@@ -127,7 +176,6 @@ class JobsController {
           {
             field: "description",
             type: "string",
-            optional: true,
           },
           {
             field: "cron",
@@ -145,6 +193,16 @@ class JobsController {
             atLeastOne: true,
           },
           {
+            field: "body",
+            type: "object",
+            optional: true,
+          },
+        ]
+      );
+
+      if (url || method) {
+        checkProperties({ url, method }, "req.body", [
+          {
             field: "url",
             type: "string",
           },
@@ -152,13 +210,64 @@ class JobsController {
             field: "method",
             type: "string",
           },
+        ]);
+      }
+
+      if (queueUrl || queueType || messageGroupId || messageDeduplicationId) {
+        checkProperties({ queueUrl, queueType }, "req.body", [
           {
-            field: "body",
-            type: "object",
-            optional: true,
+            field: "queueUrl",
+            type: "string",
           },
-        ]
-      );
+          {
+            field: "queueType",
+            type: "string",
+          },
+        ]);
+
+        if (queueType === "fifo") {
+          checkProperties(
+            { messageGroupId, messageDeduplicationId },
+            "req.body",
+            [
+              {
+                field: "messageGroupId",
+                type: "string",
+              },
+              {
+                field: "messageDeduplicationId",
+                type: "string",
+              },
+            ]
+          );
+
+          return JobService.createJob({
+            name,
+            description,
+            cron,
+            timer,
+            repetitions,
+            body,
+            queueUrl,
+            queueType,
+            messageGroupId,
+            messageDeduplicationId,
+          });
+        }
+
+        if (queueType === "standard") {
+          return JobService.createJob({
+            name,
+            description,
+            cron,
+            timer,
+            repetitions,
+            body,
+            queueUrl,
+            queueType,
+          });
+        }
+      }
 
       JobService.createJob({
         name,
@@ -185,13 +294,13 @@ class JobsController {
     try {
       const { name } = req.params;
       const { cron, timer, url, method, body } = req.body;
-      validateParameters({ name }, [
+      checkProperties({ name }, "req.params", [
         {
           field: "name",
           type: "string",
         },
       ]);
-      validateParameters({ cron, timer, url, method, body }, [
+      checkProperties({ cron, timer, url, method, body }, "req.body", [
         {
           field: "cron",
           type: "string",
@@ -254,7 +363,7 @@ class JobsController {
   ) {
     try {
       const { name } = req.params;
-      validateParameters({ name }, [
+      checkProperties({ name }, "req.params", [
         {
           field: "name",
           type: "string",

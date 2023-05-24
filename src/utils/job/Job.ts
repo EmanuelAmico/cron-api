@@ -1,5 +1,5 @@
 import { CronJob, CronTime } from "cron";
-import { IJob, JobData } from "../../types";
+import { IJob, StrictUnion } from "../../types";
 import {
   formattedDate,
   formattedNowDate,
@@ -10,7 +10,7 @@ import { filterSimilar, findMostSimilar, pick } from "../helpers";
 
 class Job implements IJob {
   #name: string;
-  #description?: string;
+  #description: string;
   #cron?: string;
   #cronJob?: CronJob;
   #timer?: number;
@@ -25,6 +25,8 @@ class Job implements IJob {
   #repetitions?: number;
   #remainingRepetitions?: number;
   #executionTimes: number;
+  #createdAt: string;
+  #updatedAt: string;
   #calculateNextRunTimeRemainingInterval?: NodeJS.Timer;
   #callback: () => void;
   #onStart?: () => void;
@@ -38,7 +40,7 @@ class Job implements IJob {
   public get description() {
     return this.#description;
   }
-  private set description(description: string | undefined) {
+  private set description(description: string) {
     this.#description = description;
   }
   public get cron() {
@@ -104,6 +106,18 @@ class Job implements IJob {
   private set executionTimes(executionTimes: number) {
     this.#executionTimes = executionTimes;
   }
+  public get createdAt() {
+    return this.#createdAt;
+  }
+  private set createdAt(createdAt: string) {
+    this.#createdAt = createdAt;
+  }
+  public get updatedAt() {
+    return this.#updatedAt;
+  }
+  private set updatedAt(updatedAt: string) {
+    this.#updatedAt = updatedAt;
+  }
   private get calculateNextRunTimeRemainingInterval() {
     return this.#calculateNextRunTimeRemainingInterval;
   }
@@ -132,11 +146,18 @@ class Job implements IJob {
     this.#onStop = onStop;
   }
   static #runningJobs: Job[] = [];
+  static #createdJobs: Job[] = [];
   protected static get runningJobs() {
     return this.#runningJobs;
   }
   private static set runningJobs(runningJobs: Job[]) {
     this.#runningJobs = runningJobs;
+  }
+  protected static get createdJobs() {
+    return this.#createdJobs;
+  }
+  private static set createdJobs(createdJobs: Job[]) {
+    this.#createdJobs = createdJobs;
   }
 
   constructor({
@@ -148,8 +169,16 @@ class Job implements IJob {
     callback,
     onStart,
     onStop,
-  }: JobData) {
-    if (Job.runningJobs.find((job) => job.name === name))
+  }: {
+    name: string;
+    description: string;
+    callback: () => unknown;
+    onStart?: () => void;
+    onStop?: () => void;
+  } & StrictUnion<
+    { cron: string; repetitions?: number } | { timer: Date | string | number }
+  >) {
+    if (Job.createdJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
     if (!cron && !timer)
@@ -162,6 +191,7 @@ class Job implements IJob {
       throw new Error("Invalid job, repetitions must be greater than 0.");
 
     this.#name = name;
+    this.#description = description;
     this.#executionTimes = 0;
     this.#callback = async () => {
       try {
@@ -172,8 +202,9 @@ class Job implements IJob {
         console.error(`Error executing job '${this.name}'`, error);
       }
     };
+    this.#createdAt = formattedNowDate();
+    this.#updatedAt = formattedNowDate();
 
-    if (description) this.description = description;
     if (cron) this.cron = cron;
     if (repetitions) {
       this.repetitions = repetitions;
@@ -184,10 +215,7 @@ class Job implements IJob {
         typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
     if (onStart) this.onStart = onStart;
     if (onStop) this.onStop = onStop;
-  }
-
-  public static startJobs() {
-    this.runningJobs.forEach((job) => job.start());
+    Job.createdJobs.push(this);
   }
 
   public static stopJobs() {
@@ -217,12 +245,16 @@ class Job implements IJob {
     cron,
     repetitions,
     nextRunDate,
+    createdAt,
+    updatedAt,
   }: {
     name?: string;
     description?: string;
     cron?: string;
     repetitions?: number;
     nextRunDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
   }) {
     const similarJobs: Job[] = [];
 
@@ -284,13 +316,63 @@ class Job implements IJob {
       );
     }
 
-    // Remove duplicates
-    return similarJobs.filter(
-      (job, index, jobs) => jobs.findIndex((j) => j.name === job.name) === index
+    if (createdAt) {
+      const similarJobCreatedAts = filterSimilar(
+        createdAt,
+        this.runningJobs.map((job) => job.createdAt)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobCreatedAts.includes(job.createdAt || "")
+        )
+      );
+    }
+
+    if (updatedAt) {
+      const similarJobUpdatedAts = filterSimilar(
+        updatedAt,
+        this.runningJobs.map((job) => job.updatedAt)
+      );
+
+      similarJobs.push(
+        ...this.runningJobs.filter((job) =>
+          similarJobUpdatedAts.includes(job.updatedAt || "")
+        )
+      );
+    }
+
+    const hasDuplicates = similarJobs.some(
+      (job, index, self) => self.findIndex((j) => j.name === job.name) !== index
     );
+
+    if (hasDuplicates)
+      return similarJobs
+        .filter(
+          (job, _, self) => self.filter((j) => j.name === job.name).length > 1
+        )
+        .filter(
+          (job, index, self) =>
+            self.findIndex((j) => job && j && j.name === job.name) === index
+        );
+
+    return [name, description, cron, repetitions, nextRunDate].filter(
+      (value) => value
+    ).length > 1
+      ? []
+      : similarJobs;
   }
 
   public start() {
+    if (
+      this.constructor === Job &&
+      Job.#runningJobs.some((job) => job.name === this.name)
+    ) {
+      throw new Error(
+        `There is a Job with name '${this.name}' that is already running. Job names must be unique. Please, edit the name of the job.`
+      );
+    }
+
     if (this.cron) {
       this.cronJob = new CronJob(
         this.cron,
@@ -360,13 +442,28 @@ class Job implements IJob {
     repetitions,
     timer,
     callback,
-  }: Partial<Pick<JobData, "callback">> & Omit<JobData, "callback">) {
-    if (this.cron && this.cronJob) {
-      if (!cron) throw new Error("No cron provided.");
-      this.name = name;
-      this.cronJob.setTime(new CronTime(cron));
-      this.cron = cron;
-      if (description) this.description = description;
+    onStart,
+    onStop,
+  }: {
+    name?: string;
+    description?: string;
+    callback?: () => void;
+    onStart?: () => void;
+    onStop?: () => void;
+  } & StrictUnion<
+    { cron: string; repetitions?: number } | { timer: Date | string | number }
+  >) {
+    if (Job.createdJobs.some((job) => job.name === name)) {
+      throw new Error(
+        `A job with name ${name} already exists. Job names must be unique. Please, use another name.`
+      );
+    }
+
+    if (this.cron) {
+      if (cron && this.cronJob) {
+        this.cron = cron;
+        this.cronJob.setTime(new CronTime(cron));
+      }
       if (repetitions) {
         if (repetitions <= this.executionTimes)
           throw new Error(
@@ -376,16 +473,34 @@ class Job implements IJob {
         this.remainingRepetitions = repetitions - this.executionTimes;
         if (this.remainingRepetitions === 0) this.stop();
       }
+      if (name) this.name = name;
+      if (description) this.description = description;
       if (callback) this.callback = callback;
+      if (onStart) this.onStart = onStart;
+      if (onStop) this.onStop = onStop;
+      this.updatedAt = formattedNowDate();
     }
 
-    if (this.timer && this.timeout) {
-      if (!timer) throw new Error("No timer provided.");
-      this.name = name;
-      this.timer =
-        typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
-
+    if (this.timer) {
+      if (timer) {
+        this.timer =
+          typeof timer === "number"
+            ? timer
+            : timeDifferenceInMs(new Date(timer));
+      }
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+          this.callback();
+          this.stop();
+        }, this.timer);
+      }
+      if (name) this.name = name;
+      if (description) this.description = description;
       if (callback) this.callback = callback;
+      if (onStart) this.onStart = onStart;
+      if (onStop) this.onStop = onStop;
+      this.updatedAt = formattedNowDate();
     }
 
     return this;
@@ -402,6 +517,8 @@ class Job implements IJob {
       "executionTimes",
       "nextRunDate",
       "nextRunTimeRemaining",
+      "createdAt",
+      "updatedAt",
     ]);
   }
 }

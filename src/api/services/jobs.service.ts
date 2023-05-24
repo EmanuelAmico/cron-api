@@ -26,16 +26,28 @@ class JobService {
     cron,
     repetitions,
     nextRunDate,
+    createdAt,
+    updatedAt,
     url,
     method,
+    queueUrl,
+    queueType,
+    messageGroupId,
+    messageDeduplicationId,
   }: {
     name?: string;
     description?: string;
     cron?: string;
     repetitions?: number;
     nextRunDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
     url?: string;
     method?: Method;
+    queueUrl?: string;
+    queueType?: "fifo" | "standard";
+    messageGroupId?: string;
+    messageDeduplicationId?: string;
   }) {
     const jobs = Job.findSimilarJobs({
       name,
@@ -43,6 +55,8 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
     });
     const axiosJobs = AxiosJob.findSimilarJobs({
       name,
@@ -50,6 +64,8 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
       url,
       method,
     });
@@ -59,6 +75,12 @@ class JobService {
       cron,
       repetitions,
       nextRunDate,
+      createdAt,
+      updatedAt,
+      queueUrl,
+      queueType,
+      messageGroupId,
+      messageDeduplicationId,
     });
 
     return [...jobs, ...axiosJobs, ...sqsJobs].map((job) => job.toJSON());
@@ -192,7 +214,7 @@ class JobService {
     queueType,
     messageGroupId,
     messageDeduplicationId,
-  }: Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
+  }: { name: string } & Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
     Parameters<InstanceType<typeof SQSJob>["edit"]>[0]) {
     const job =
       Job.getJobByName(name) ||
@@ -202,45 +224,86 @@ class JobService {
     if (!job) throw new Error("Job not found");
 
     if (job instanceof AxiosJob) {
-      job.edit({
-        name,
-        description,
-        cron,
-        repetitions,
-        timer,
-        url,
-        query,
-        method,
-        body,
-        instance,
-      });
+      if (timer) {
+        job.edit({
+          name,
+          description,
+          repetitions,
+          timer,
+          url,
+          query,
+          method,
+          body,
+          instance,
+        });
+      }
+
+      if (cron) {
+        job.edit({
+          name,
+          description,
+          cron,
+          repetitions,
+          url,
+          query,
+          method,
+          body,
+          instance,
+        });
+      }
     }
 
     if (job instanceof SQSJob) {
       if (queueType === "fifo") {
-        job.edit({
-          name,
-          description,
-          cron,
-          repetitions,
-          timer,
-          queueUrl,
-          queueType,
-          messageGroupId,
-          messageDeduplicationId,
-        });
+        if (timer) {
+          job.edit({
+            name,
+            description,
+            repetitions,
+            timer,
+            queueUrl,
+            queueType,
+            messageGroupId,
+            messageDeduplicationId,
+          });
+        }
+
+        if (cron) {
+          job.edit({
+            name,
+            description,
+            cron,
+            repetitions,
+            queueUrl,
+            queueType,
+            messageGroupId,
+            messageDeduplicationId,
+          });
+        }
       }
 
       if (queueType === "standard") {
-        job.edit({
-          name,
-          description,
-          cron,
-          repetitions,
-          timer,
-          queueUrl,
-          queueType,
-        });
+        if (timer) {
+          job.edit({
+            name,
+            description,
+            repetitions,
+            timer,
+            queueUrl,
+            queueType,
+          });
+        }
+
+        if (cron) {
+          job.edit({
+            name,
+            description,
+            cron,
+            repetitions,
+            queueUrl,
+            queueType,
+          });
+        }
       }
     }
   }
