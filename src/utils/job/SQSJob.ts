@@ -1,8 +1,8 @@
 import { ISQSJob, StrictUnion } from "../../types";
 import { Job } from ".";
 import { filterSimilar, pick } from "../helpers";
-import { SQS } from "aws-sdk";
 import { config } from "../../api/config";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 
@@ -12,6 +12,15 @@ class SQSJob extends Job implements ISQSJob {
   #body: unknown;
   #messageGroupId?: string;
   #messageDeduplicationId?: string;
+  static #runningJobs: SQSJob[] = [];
+  static #createdJobs: SQSJob[] = [];
+  static #sqsClient = new SQSClient({
+    region: "sa-east-1",
+    credentials: {
+      accessKeyId: SQS_ACCESS_KEY,
+      secretAccessKey: SQS_SECRET_KEY,
+    },
+  });
   public get queueUrl() {
     return this.#queueUrl;
   }
@@ -44,22 +53,20 @@ class SQSJob extends Job implements ISQSJob {
   ) {
     this.#messageDeduplicationId = messageDeduplicationId;
   }
-  static #sqs = new SQS({
-    region: "sa-east-1",
-    credentials: {
-      accessKeyId: SQS_ACCESS_KEY,
-      secretAccessKey: SQS_SECRET_KEY,
-    },
-  });
-  static #runningJobs: SQSJob[] = [];
   protected static get runningJobs() {
     return this.#runningJobs;
   }
-  private static set runningJobs(jobs: SQSJob[]) {
-    this.#runningJobs = jobs;
+  private static set runningJobs(runningJobs: SQSJob[]) {
+    this.#runningJobs = runningJobs;
   }
-  private static get sqs() {
-    return this.#sqs;
+  protected static get createdJobs() {
+    return this.#createdJobs;
+  }
+  private static set createdJobs(createdJobs: SQSJob[]) {
+    this.#createdJobs = createdJobs;
+  }
+  private static get sqsClient() {
+    return this.#sqsClient;
   }
 
   constructor({
@@ -73,8 +80,8 @@ class SQSJob extends Job implements ISQSJob {
     body,
     messageGroupId,
     messageDeduplicationId,
-    onStart: handleStart,
-    onStop: handleStop,
+    onStart,
+    onStop,
   }: Omit<ConstructorParameters<typeof Job>[0], "callback"> &
     StrictUnion<
       { cron: string; repetitions?: number } | { timer: Date | string | number }
@@ -93,30 +100,14 @@ class SQSJob extends Job implements ISQSJob {
       throw new Error("A job with that name already exists.");
 
     const callback = async () =>
-      await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        SQSJob.sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify(this.body),
-            QueueUrl: this.queueUrl.href,
-            MessageGroupId: this.messageGroupId,
-            MessageDeduplicationId: this.messageDeduplicationId,
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
-      });
-
-    const onStart = () => {
-      SQSJob.runningJobs.push(this);
-      if (handleStart) handleStart();
-    };
-
-    const onStop = () => {
-      SQSJob.runningJobs = SQSJob.runningJobs.filter((job) => job !== this);
-      if (handleStop) handleStop();
-    };
+      await SQSJob.sqsClient.send(
+        new SendMessageCommand({
+          MessageBody: JSON.stringify(this.body),
+          QueueUrl: this.queueUrl.href,
+          MessageGroupId: this.messageGroupId,
+          MessageDeduplicationId: this.messageDeduplicationId,
+        })
+      );
 
     super(
       cron
@@ -152,8 +143,12 @@ class SQSJob extends Job implements ISQSJob {
       this.messageDeduplicationId = messageDeduplicationId;
   }
 
+  public static listCreatedJobs() {
+    return super.listCreatedJobs() as SQSJob[];
+  }
+
   public static listRunningJobs() {
-    return super.listRunningJobs() as unknown as SQSJob[];
+    return super.listRunningJobs() as SQSJob[];
   }
 
   public static stopJobs() {
@@ -353,10 +348,6 @@ class SQSJob extends Job implements ISQSJob {
 
   public stop() {
     super.stop();
-    if (this.constructor === SQSJob)
-      SQSJob.runningJobs = SQSJob.runningJobs.filter(
-        (job) => job.name !== this.name
-      );
   }
 
   public toJSON() {

@@ -1,4 +1,4 @@
-import { SQS, AWSError } from "aws-sdk";
+import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { v4 as uuidv4 } from "uuid";
 import { sqs } from "..";
 import { config } from "../../../config/env";
@@ -19,15 +19,9 @@ class PipedriveRepository {
 
   public static async listQueues() {
     try {
-      return await new Promise<SQS.ListQueuesResult>((resolve, reject) => {
-        sqs.listQueues((error, data) => {
-          if (error) reject(error);
-          else resolve(data);
-        });
-      });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+      return await sqs.listQueues({});
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -59,23 +53,14 @@ class PipedriveRepository {
       >
   ) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({ type: "CREATE_DEAL", payload: deal }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({ type: "CREATE_DEAL", payload: deal }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -87,26 +72,17 @@ class PipedriveRepository {
     fields: Partial<IDeal>;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "UPDATE_DEAL",
-              payload: { deal_id, fields },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "UPDATE_DEAL",
+          payload: { deal_id, fields },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -124,26 +100,17 @@ class PipedriveRepository {
     >;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "UPDATE_WON_DEAL_BY_EMAIL_AND_COHORT_LABEL",
-              payload: { email, cohortLabel, fields },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "UPDATE_WON_DEAL_BY_EMAIL_AND_COHORT_LABEL",
+          payload: { email, cohortLabel, fields },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -157,26 +124,17 @@ class PipedriveRepository {
     fields: Partial<IDeal>;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "UPDATE_OPEN_OR_LOST_DEAL_BY_EMAIL_AND_COURSE_NAME",
-              payload: { email, courseName, fields },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "UPDATE_OPEN_OR_LOST_DEAL_BY_EMAIL_AND_COURSE_NAME",
+          payload: { email, courseName, fields },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -196,33 +154,24 @@ class PipedriveRepository {
     newCohortLabel?: string;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "CHANGE_OR_DELETE_COMMISSION_FROM_DEAL",
-              payload: {
-                operation,
-                email,
-                cohortLabel,
-                dealTitle,
-                newCommissionName,
-                newCohortLabel,
-              },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "CHANGE_OR_DELETE_COMMISSION_FROM_DEAL",
+          payload: {
+            operation,
+            email,
+            cohortLabel,
+            dealTitle,
+            newCommissionName,
+            newCohortLabel,
           },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -233,26 +182,17 @@ class PipedriveRepository {
       >
   ) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "CREATE_PERSON",
-              payload: person,
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "CREATE_PERSON",
+          payload: person,
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -263,26 +203,17 @@ class PipedriveRepository {
       >
   ) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "CREATE_OR_UPDATE_PERSON",
-              payload: person,
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "CREATE_OR_UPDATE_PERSON",
+          payload: person,
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -317,76 +248,49 @@ class PipedriveRepository {
       >
   ) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "CREATE_OR_UPDATE_PERSON_AND_OPEN_OR_LOST_DEAL",
-              payload: { deal, person },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "CREATE_OR_UPDATE_PERSON_AND_OPEN_OR_LOST_DEAL",
+          payload: { deal, person },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
   public async getPerson(person_id: number) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "GET_PERSON",
-              payload: { person_id },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "GET_PERSON",
+          payload: { person_id },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
   public async getPersonByEmail(email: string) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "GET_PERSON_BY_EMAIL",
-              payload: { email },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "GET_PERSON_BY_EMAIL",
+          payload: { email },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -398,26 +302,17 @@ class PipedriveRepository {
     fields: Partial<IPerson>;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "UPDATE_PERSON",
-              payload: { person_id, fields },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "UPDATE_PERSON",
+          payload: { person_id, fields },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -429,26 +324,17 @@ class PipedriveRepository {
     content: string;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "ADD_NOTE_TO_DEAL",
-              payload: { deal_id, content },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "ADD_NOTE_TO_DEAL",
+          payload: { deal_id, content },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -462,26 +348,17 @@ class PipedriveRepository {
     content: string;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "ADD_NOTE_TO_OPEN_DEAL_BY_EMAIL_AND_COURSE_NAME",
-              payload: { email, courseName, content },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "ADD_NOTE_TO_OPEN_DEAL_BY_EMAIL_AND_COURSE_NAME",
+          payload: { email, courseName, content },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -493,26 +370,17 @@ class PipedriveRepository {
     userForm: IBCForm;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "ADD_BC_FORM_TO_NOTE",
-              payload: { deal_id, userForm },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "ADD_BC_FORM_TO_NOTE",
+          payload: { deal_id, userForm },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 
@@ -526,26 +394,17 @@ class PipedriveRepository {
     stageName: Stage;
   }) {
     try {
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(
-          {
-            MessageBody: JSON.stringify({
-              type: "UPDATE_DEAL_STAGE",
-              payload: { deal_id, courseName, stageName },
-            }),
-            QueueUrl: PIPEDRIVE_QUEUE_URL,
-            MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
-            MessageDeduplicationId: uuidv4(),
-          },
-          (error, data) => {
-            if (error) reject(error);
-            else resolve(data);
-          }
-        );
+      return await sqs.sendMessage({
+        MessageBody: JSON.stringify({
+          type: "UPDATE_DEAL_STAGE",
+          payload: { deal_id, courseName, stageName },
+        }),
+        QueueUrl: PIPEDRIVE_QUEUE_URL,
+        MessageGroupId: PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
+        MessageDeduplicationId: uuidv4(),
       });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 }

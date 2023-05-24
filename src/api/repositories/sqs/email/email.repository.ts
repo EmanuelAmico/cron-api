@@ -1,4 +1,4 @@
-import { SQS, AWSError } from "aws-sdk";
+import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { config } from "../../../config/env";
 import { ICourseInformation, IEmailParams } from "../../../../types";
 import { sqs } from "..";
@@ -37,15 +37,9 @@ class SQSEmailRepository {
         QueueUrl: EMAIL_QUEUE_URL,
       };
 
-      return await new Promise<SQS.SendMessageResult>((resolve, reject) => {
-        sqs.sendMessage(params, (error, data) => {
-          if (error) reject(error);
-          else resolve(data);
-        });
-      });
-    } catch (err) {
-      const error = err as AWSError;
-      throw new ExternalError("sqs_error", error);
+      return await sqs.sendMessage(params);
+    } catch (error) {
+      throw new ExternalError("sqs_error", error as SQSServiceException);
     }
   }
 

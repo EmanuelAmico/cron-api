@@ -1,4 +1,4 @@
-import { SQS } from "aws-sdk";
+import { SQS } from "@aws-sdk/client-sqs";
 import SQSEmailRepository from "./email/email.repository";
 import PipedriveRepository from "./pipedrive/pipedrive.repository";
 import { config } from "../../config/env";
