@@ -2,7 +2,12 @@ import { ISQSJob, StrictUnion } from "../../types";
 import { Job } from ".";
 import { filterSimilar, pick } from "../helpers";
 import { config } from "../../api/config";
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import {
+  SQSClient,
+  SQSServiceException,
+  SendMessageCommand,
+} from "@aws-sdk/client-sqs";
+import { JobError } from "../errors";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 
@@ -99,15 +104,20 @@ class SQSJob extends Job implements ISQSJob {
     if (SQSJob.runningJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
-    const callback = async () =>
-      await SQSJob.sqsClient.send(
-        new SendMessageCommand({
-          MessageBody: JSON.stringify(this.body),
-          QueueUrl: this.queueUrl.href,
-          MessageGroupId: this.messageGroupId,
-          MessageDeduplicationId: this.messageDeduplicationId,
-        })
-      );
+    const callback = async () => {
+      try {
+        await SQSJob.sqsClient.send(
+          new SendMessageCommand({
+            MessageBody: JSON.stringify(this.body),
+            QueueUrl: this.queueUrl.href,
+            MessageGroupId: this.messageGroupId,
+            MessageDeduplicationId: this.messageDeduplicationId,
+          })
+        );
+      } catch (error) {
+        throw new JobError(error as SQSServiceException);
+      }
+    };
 
     super(
       cron

@@ -9,6 +9,7 @@ import {
 import { filterSimilar, findMostSimilar, pick } from "../helpers";
 import { AxiosJob } from "./AxiosJob";
 import { SQSJob } from "./SQSJob";
+import { JobError, checkAndHandleErrors } from "../errors";
 
 class Job implements IJob {
   declare ["constructor"]: typeof Job;
@@ -205,11 +206,18 @@ class Job implements IJob {
     this.#executionTimes = 0;
     this.#callback = async () => {
       try {
-        console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
+        console.log(
+          `\n[Execution: Running job '${this.name}' - ${formattedNowDate()}]`
+        );
         const result = await callback();
         if (result) console.log(result);
       } catch (error) {
-        console.error(`Error executing job '${this.name}'`, error);
+        console.error(
+          `\n[Error: Failed to execute job '${
+            this.name
+          }' - ${formattedNowDate()}]`
+        );
+        checkAndHandleErrors(error as JobError);
       }
     };
     this.#createdAt = formattedNowDate();

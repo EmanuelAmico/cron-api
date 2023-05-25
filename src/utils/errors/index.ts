@@ -1,44 +1,97 @@
 import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { AxiosError } from "axios";
 
-interface BaseError {
-  error: Error | { message: string };
+type TJobError = Error | AxiosError | SQSServiceException;
+
+interface IJobError {
   name: string;
+  message: string;
+  stack?: string;
   status?: number;
 }
 
-interface JobError extends BaseError {
-  error: Error | AxiosError;
-}
+export class JobError implements IJobError {
+  declare ["constructor"]: typeof JobError;
+  #name: string;
+  #message: string;
+  #stack?: string;
+  #status?: number;
+  public get name() {
+    return this.#name;
+  }
+  private set name(name: string) {
+    this.#name = name;
+  }
+  public get message() {
+    return this.#message;
+  }
+  private set message(message: string) {
+    this.#message = message;
+  }
+  public get status() {
+    return this.#status;
+  }
+  private set status(status: number | undefined) {
+    this.#status = status;
+  }
+  public get stack() {
+    return this.#stack;
+  }
+  private set stack(stack: string | undefined) {
+    this.#stack = stack;
+  }
 
-interface SQSError extends SQSServiceException {
-  message: string;
-}
+  constructor(error: TJobError) {
+    let _name = "";
+    let _message = "";
+    let _status: number;
 
-class BaseError extends Error implements BaseError {
-  constructor(name: string, error: Error | { message: string }) {
-    super(name);
-    this.error = error;
+    switch (true) {
+      case error.constructor === Error:
+        _name = "Error";
+        _message = (error as Error).message;
+        _status = 500;
+        break;
+      case error.constructor === AxiosError:
+        _name = "Axios Error";
+        _message =
+          (error as AxiosError).response?.statusText || "No message provided";
+        _status = (error as AxiosError).response?.status || 500;
+        break;
+      case error.constructor === SQSServiceException:
+        _name = "SQS Service Exception";
+        _message = (error as SQSServiceException).message;
+        _status =
+          (error as SQSServiceException).$metadata.httpStatusCode || 500;
+        break;
+      default:
+        _name = error.name;
+        _message = error.message;
+        _status = 500;
+        break;
+    }
+
+    const stackTrace: { stack?: string } = {};
+    Error.captureStackTrace(stackTrace, this.constructor);
+    this.#name = _name;
+    this.#message = _message;
+    this.#status = _status;
+    this.#stack = stackTrace.stack;
   }
 }
 
-class JobError extends BaseError implements JobError {
-  constructor(error: Error | AxiosError | SQSError | { message: string }) {
-    const name =
-      error instanceof AxiosError ? "Pipedrive Error" : "Lambda Error";
-    super(name, error);
-
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = name;
-    this.error =
-      error instanceof AxiosError
-        ? error.response?.data
-        : (error as Error & { error: Error })?.error || error;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-export const checkAndHandleErrors = ({ name, error, stack }: JobError) =>
-  console.error(`[${name}]`, "\n\n", stack, "\n\n", error?.message || error);
-
-export { JobError };
+export const checkAndHandleErrors = ({
+  name,
+  message,
+  status,
+  stack,
+}: JobError) =>
+  console.error(
+    `[${name}]`,
+    "\n\n",
+    `[Status: ${status}]`,
+    "\n\n",
+    `[Message: ${message}]`,
+    "\n\n",
+    `[Stack: ${stack}]`
+  );
