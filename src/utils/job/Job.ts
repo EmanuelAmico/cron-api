@@ -7,8 +7,12 @@ import {
   timeRemaining,
 } from "../date";
 import { filterSimilar, findMostSimilar, pick } from "../helpers";
+import { AxiosJob } from "./AxiosJob";
+import { SQSJob } from "./SQSJob";
+import { JobError, checkAndHandleErrors } from "../errors";
 
 class Job implements IJob {
+  declare ["constructor"]: typeof Job;
   #name: string;
   #description: string;
   #cron?: string;
@@ -31,6 +35,9 @@ class Job implements IJob {
   #callback: () => void;
   #onStart?: () => void;
   #onStop?: () => void;
+  static #runningJobs: Job[] = [];
+  static #createdJobs: Job[] = [];
+  static #allJobs: (Job | AxiosJob | SQSJob)[] = [];
   public get name() {
     return this.#name;
   }
@@ -145,8 +152,6 @@ class Job implements IJob {
   private set onStop(onStop: (() => void) | undefined) {
     this.#onStop = onStop;
   }
-  static #runningJobs: Job[] = [];
-  static #createdJobs: Job[] = [];
   protected static get runningJobs() {
     return this.#runningJobs;
   }
@@ -158,6 +163,12 @@ class Job implements IJob {
   }
   private static set createdJobs(createdJobs: Job[]) {
     this.#createdJobs = createdJobs;
+  }
+  private static get allJobs() {
+    return this.#allJobs;
+  }
+  private static set allJobs(allJobs: (Job | AxiosJob | SQSJob)[]) {
+    this.#allJobs = allJobs;
   }
 
   constructor({
@@ -178,7 +189,7 @@ class Job implements IJob {
   } & StrictUnion<
     { cron: string; repetitions?: number } | { timer: Date | string | number }
   >) {
-    if (Job.createdJobs.find((job) => job.name === name))
+    if (Job.allJobs.find((job) => job.name === name))
       throw new Error("A job with that name already exists.");
 
     if (!cron && !timer)
@@ -195,11 +206,18 @@ class Job implements IJob {
     this.#executionTimes = 0;
     this.#callback = async () => {
       try {
-        console.log(`\nRunning job '${this.name}' - ${formattedNowDate()}`);
+        console.log(
+          `\n[Execution: Running job '${this.name}' - ${formattedNowDate()}]`
+        );
         const result = await callback();
         if (result) console.log(result);
       } catch (error) {
-        console.error(`Error executing job '${this.name}'`, error);
+        console.error(
+          `\n[Error: Failed to execute job '${
+            this.name
+          }' - ${formattedNowDate()}]`
+        );
+        checkAndHandleErrors(error as JobError);
       }
     };
     this.#createdAt = formattedNowDate();
@@ -215,11 +233,15 @@ class Job implements IJob {
         typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
     if (onStart) this.onStart = onStart;
     if (onStop) this.onStop = onStop;
-    Job.createdJobs.push(this);
+    new.target.createdJobs.push(this);
   }
 
   public static stopJobs() {
     this.runningJobs.forEach((job) => job.stop());
+  }
+
+  public static listCreatedJobs() {
+    return this.createdJobs;
   }
 
   public static listRunningJobs() {
@@ -277,7 +299,7 @@ class Job implements IJob {
 
       similarJobs.push(
         ...this.runningJobs.filter((job) =>
-          similarJobDescriptions.includes(job.description || "")
+          similarJobDescriptions.includes(job.description)
         )
       );
     }
@@ -364,15 +386,6 @@ class Job implements IJob {
   }
 
   public start() {
-    if (
-      this.constructor === Job &&
-      Job.#runningJobs.some((job) => job.name === this.name)
-    ) {
-      throw new Error(
-        `There is a Job with name '${this.name}' that is already running. Job names must be unique. Please, edit the name of the job.`
-      );
-    }
-
     if (this.cron) {
       this.cronJob = new CronJob(
         this.cron,
@@ -415,7 +428,7 @@ class Job implements IJob {
       this.nextRunTimeRemaining = timeRemaining(nextRunDate);
     }
 
-    if (this.constructor === Job) Job.runningJobs.push(this);
+    this.constructor.runningJobs.push(this);
     if (this.onStart) this.onStart();
   }
 
@@ -430,8 +443,9 @@ class Job implements IJob {
       clearTimeout(this.timeout);
     }
 
-    if (this.constructor === Job)
-      Job.runningJobs = Job.runningJobs.filter((job) => job.name !== this.name);
+    this.constructor.runningJobs = this.constructor.runningJobs.filter(
+      (job) => job.name !== this.name
+    );
     if (this.onStop) this.onStop();
   }
 
@@ -453,7 +467,7 @@ class Job implements IJob {
   } & StrictUnion<
     { cron: string; repetitions?: number } | { timer: Date | string | number }
   >) {
-    if (Job.createdJobs.some((job) => job.name === name)) {
+    if (Job.allJobs.some((job) => job.name === name)) {
       throw new Error(
         `A job with name ${name} already exists. Job names must be unique. Please, use another name.`
       );

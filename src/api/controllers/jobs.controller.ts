@@ -166,7 +166,7 @@ class JobsController {
       } = req.body;
 
       checkProperties(
-        { name, description, cron, repetitions, timer, url, method, body },
+        { name, description, cron, repetitions, timer },
         "req.body",
         [
           {
@@ -192,16 +192,11 @@ class JobsController {
             type: "number",
             atLeastOne: true,
           },
-          {
-            field: "body",
-            type: "object",
-            optional: true,
-          },
         ]
       );
 
-      if (url || method) {
-        checkProperties({ url, method }, "req.body", [
+      if (url || method || body) {
+        checkProperties({ url, method, body }, "req.body", [
           {
             field: "url",
             type: "string",
@@ -210,7 +205,23 @@ class JobsController {
             field: "method",
             type: "string",
           },
+          {
+            field: "body",
+            type: "object",
+            optional: true,
+          },
         ]);
+
+        JobService.createJob({
+          name,
+          description,
+          cron,
+          timer,
+          repetitions,
+          url,
+          method,
+          body,
+        });
       }
 
       if (queueUrl || queueType || messageGroupId || messageDeduplicationId) {
@@ -241,7 +252,7 @@ class JobsController {
             ]
           );
 
-          return JobService.createJob({
+          JobService.createJob({
             name,
             description,
             cron,
@@ -256,7 +267,7 @@ class JobsController {
         }
 
         if (queueType === "standard") {
-          return JobService.createJob({
+          JobService.createJob({
             name,
             description,
             cron,
@@ -268,17 +279,6 @@ class JobsController {
           });
         }
       }
-
-      JobService.createJob({
-        name,
-        description,
-        cron,
-        timer,
-        repetitions,
-        url,
-        method,
-        body,
-      });
 
       res.status(200).send({ message: "Job was created successfully." });
     } catch (err) {

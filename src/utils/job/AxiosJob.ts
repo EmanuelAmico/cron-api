@@ -13,6 +13,8 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   #headers?: Record<string, string>;
   #query?: Record<string, string>;
   #body?: BodyType;
+  static #runningJobs: AxiosJob[] = [];
+  static #createdJobs: AxiosJob[] = [];
   public get url() {
     return this.#url;
   }
@@ -43,12 +45,17 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   private set body(body: BodyType | undefined) {
     this.#body = body;
   }
-  static #runningJobs: AxiosJob[] = [];
   protected static get runningJobs() {
     return this.#runningJobs;
   }
-  private static set runningJobs(jobs: AxiosJob[]) {
-    this.#runningJobs = jobs;
+  private static set runningJobs(runningJobs: AxiosJob[]) {
+    this.#runningJobs = runningJobs;
+  }
+  protected static get createdJobs() {
+    return this.#createdJobs;
+  }
+  private static set createdJobs(createdJobs: AxiosJob[]) {
+    this.#createdJobs = createdJobs;
   }
 
   constructor({
@@ -62,8 +69,8 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
     headers,
     query,
     body,
-    onStart: handleStart,
-    onStop: handleStop,
+    onStart,
+    onStop,
     instance,
   }: Omit<ConstructorParameters<typeof Job>[0], "callback"> &
     StrictUnion<
@@ -95,16 +102,6 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
             url: this.url.href,
             body: this.body,
           });
-
-    const onStart = () => {
-      AxiosJob.runningJobs.push(this);
-      if (handleStart) handleStart();
-    };
-
-    const onStop = () => {
-      AxiosJob.runningJobs = AxiosJob.runningJobs.filter((job) => job !== this);
-      if (handleStop) handleStop();
-    };
 
     super(
       cron
@@ -140,6 +137,10 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
     if (body) this.body = body;
     this.#url = url;
     this.#method = method;
+  }
+
+  public static listCreatedJobs() {
+    return super.listCreatedJobs() as AxiosJob[];
   }
 
   public static listRunningJobs() {
@@ -312,10 +313,6 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
 
   public stop() {
     super.stop();
-    if (this.constructor === AxiosJob)
-      AxiosJob.runningJobs = AxiosJob.runningJobs.filter(
-        (job) => job.name !== this.name
-      );
   }
 
   public toJSON() {
