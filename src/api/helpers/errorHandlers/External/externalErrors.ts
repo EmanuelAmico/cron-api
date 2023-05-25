@@ -12,7 +12,7 @@ class BaseError extends Error {
     externalInfo: Error | { status: number; message: string }
   ) {
     super(errorName);
-    console.log(`[${errorName}]`, externalInfo);
+    console.error(`[${errorName}]`, externalInfo);
     Object.setPrototypeOf(this, new.target.prototype);
     this.error = externalInfo;
   }

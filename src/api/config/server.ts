@@ -1,15 +1,15 @@
-import express from "express";
+import { Router, json } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import morganJSON from "morgan-json";
 import { config } from "./env";
 
 // Router
-const router = express.Router();
+const router = Router();
 
 // Middlewares
 router.use(helmet());
-router.use(express.json());
+router.use(json());
 
 // Production Logger
 if (config.NODE_ENV === "production") {

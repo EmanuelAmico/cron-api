@@ -1,7 +1,7 @@
-import express from "express";
+import { Router } from "express";
 import jobRoutes from "./jobs.routes";
 
-const router = express.Router();
+const router = Router();
 
 router.use("/jobs", jobRoutes);
 

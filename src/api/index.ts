@@ -40,4 +40,5 @@ app.use((err: BaseError, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Server start-up
+// eslint-disable-next-line no-console
 app.listen(PORT, () => console.log(`REST API Server running on port ${PORT}`));
