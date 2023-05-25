@@ -1,3 +1,11 @@
+export interface IUserRole {
+  readonly id: number;
+  UserId: number;
+  RoleId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IRole {
   readonly id: number;
   name: string;
@@ -6,12 +14,10 @@ export interface IRole {
   user_roles: IUserRole;
 }
 
-export interface IUserRole {
-  readonly id: number;
-  UserId: number;
-  RoleId: number;
-  createdAt: Date;
-  updatedAt: Date;
+export interface IInscriptionsRole {
+  readonly id?: number;
+  name: string;
+  module?: string;
 }
 
 export type IUserInscriptionRol = {
@@ -23,9 +29,3 @@ export type PleduRol = {
   name: string;
   module: string;
 };
-
-export interface IInscriptionsRole {
-  readonly id?: number;
-  name: string;
-  module?: string;
-}

@@ -206,10 +206,12 @@ class Job implements IJob {
     this.#executionTimes = 0;
     this.#callback = async () => {
       try {
+        // eslint-disable-next-line no-console
         console.log(
           `\n[Execution: Running job '${this.name}' - ${formattedNowDate()}]`
         );
         const result = await callback();
+        // eslint-disable-next-line no-console
         if (result) console.log(result);
       } catch (error) {
         console.error(

@@ -46,6 +46,7 @@ const jobs: PredefinedJobs = [
 
 jobs.forEach((job) => job.start());
 
+// eslint-disable-next-line no-console
 console.log(
   "Successfully started the following predefined jobs. \n",
   jobs.map(({ name, cron, timer }) =>

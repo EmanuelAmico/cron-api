@@ -1,40 +1,3 @@
-import { Method } from "axios";
-
-export interface IPerson {
-  name: string;
-  email: string;
-  phone: string;
-  country: CountryOptions;
-  source: SourceOptions;
-  discordTag: string;
-  birthdate: string;
-  sex: string;
-}
-
-export interface IDeal {
-  stageName: Stage;
-  person_id: number;
-  value: number;
-  currency: CurrencyOptions;
-  title: string;
-  courseName: CoursesNames;
-  paymentId: string;
-  paymentMethod: PaymentMethod;
-  shift: ShiftOptions;
-  paymentDate: string;
-  cohortLabel: string;
-  commission: string;
-  courseEdition: string;
-  alliance: string;
-  status: "open" | "won" | "lost" | "deleted";
-}
-
-export interface IPayment {
-  id: string;
-  date: string;
-  method: PaymentMethod;
-}
-
 export type PaymentMethod = "MercadoPago" | "PayPal";
 
 export type CoursesNames =
@@ -112,6 +75,41 @@ export type ShiftOptions = "mañana" | "tarde" | "full time";
 export type CurrencyOptions = "ARS" | "USD";
 
 export type Status = "open" | "won" | "lost" | "deleted";
+
+export interface IPerson {
+  name: string;
+  email: string;
+  phone: string;
+  country: CountryOptions;
+  source: SourceOptions;
+  discordTag: string;
+  birthdate: string;
+  sex: string;
+}
+
+export interface IDeal {
+  stageName: Stage;
+  person_id: number;
+  value: number;
+  currency: CurrencyOptions;
+  title: string;
+  courseName: CoursesNames;
+  paymentId: string;
+  paymentMethod: PaymentMethod;
+  shift: ShiftOptions;
+  paymentDate: string;
+  cohortLabel: string;
+  commission: string;
+  courseEdition: string;
+  alliance: string;
+  status: "open" | "won" | "lost" | "deleted";
+}
+
+export interface IPayment {
+  id: string;
+  date: string;
+  method: PaymentMethod;
+}
 
 export type IStagesIds = {
   [key in Stage]?: number;
