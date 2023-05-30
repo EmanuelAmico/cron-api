@@ -1,21 +1,23 @@
 import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { AxiosError } from "axios";
+import { AxiosJob, Job, SQSJob } from "../job";
 
 type TJobError = Error | AxiosError | SQSServiceException;
 
 interface IJobError {
   name: string;
   message: string;
-  stack?: string;
-  status?: number;
+  stack: string;
+  status: number;
 }
 
 export class JobError implements IJobError {
   declare ["constructor"]: typeof JobError;
   #name: string;
   #message: string;
-  #stack?: string;
-  #status?: number;
+  #stack: string;
+  #status: number;
+  #job?: Job | AxiosJob | SQSJob;
   public get name() {
     return this.#name;
   }
@@ -31,22 +33,33 @@ export class JobError implements IJobError {
   public get status() {
     return this.#status;
   }
-  private set status(status: number | undefined) {
+  private set status(status: number) {
     this.#status = status;
   }
   public get stack() {
     return this.#stack;
   }
-  private set stack(stack: string | undefined) {
+  private set stack(stack: string) {
     this.#stack = stack;
   }
+  public get job() {
+    return this.#job;
+  }
+  private set job(job: Job | AxiosJob | SQSJob | undefined) {
+    this.#job = job;
+  }
 
-  constructor(error: TJobError) {
+  constructor(error: TJobError | string, job?: Job | AxiosJob | SQSJob) {
     let _name = "";
     let _message = "";
-    let _status: number;
+    let _status = 500;
 
     switch (true) {
+      case typeof error === "string":
+        _name = "Error";
+        _message = error as string;
+        _status = 500;
+        break;
       case error.constructor === Error:
         _name = "Error";
         _message = (error as Error).message;
@@ -65,9 +78,11 @@ export class JobError implements IJobError {
           (error as SQSServiceException).$metadata.httpStatusCode || 500;
         break;
       default:
-        _name = error.name;
-        _message = error.message;
-        _status = 500;
+        if (typeof error !== "string") {
+          _name = error.name;
+          _message = error.message;
+          _status = 500;
+        }
         break;
     }
 
@@ -76,16 +91,12 @@ export class JobError implements IJobError {
     this.#name = _name;
     this.#message = _message;
     this.#status = _status;
-    this.#stack = stackTrace.stack;
+    this.#stack = stackTrace.stack as string;
+    if (job) this.job = job;
   }
 }
 
-export const checkAndHandleErrors = ({
-  name,
-  message,
-  status,
-  stack,
-}: JobError) =>
+export const handleJobError = ({ name, message, status, stack }: JobError) =>
   console.error(
     `[${name}]`,
     "\n\n",

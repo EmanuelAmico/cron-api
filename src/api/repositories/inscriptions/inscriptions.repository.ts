@@ -166,7 +166,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<CourseType[]>
       >({
         method: "GET",
-        url: `/data/typesofcourses`,
+        url: "/data/typesofcourses",
       });
       return response.content;
     } catch (error) {
@@ -225,7 +225,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<{ cohort: ICohort; commission: ICommission }>
       >({
         method: "POST",
-        url: `/commissions`,
+        url: "/commissions",
         body,
       });
       return response.content;

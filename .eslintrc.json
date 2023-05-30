@@ -1,15 +1,14 @@
 {
   "root": true,
   "settings": {
-    "import/resolver": {
-      "typescript": true,
-      "node": true
-    },
     "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
+      "@typescript-eslint/parser": [".ts"]
     },
-    "react": {
-      "version": "detect"
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
+      },
+      "node": true
     }
   },
   "parser": "@typescript-eslint/parser",
@@ -40,6 +39,10 @@
         "allowIndentationTabs": true
       }
     ],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "double"],
+    "no-empty-function": "error",
+    "no-implicit-coercion": "error",
     "no-console": ["warn", { "allow": ["error", "warn"] }],
     "new-parens": "error",
     "no-dupe-args": "error",

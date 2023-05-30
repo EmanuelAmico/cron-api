@@ -84,9 +84,6 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
       | { headers?: Record<string, string> }
       | { instance?: ReturnType<typeof generateInstance> }
     >) {
-    if (AxiosJob.runningJobs.find((job) => job.name === name))
-      throw new Error("A job with that name already exists.");
-
     const callback = async () =>
       instance
         ? await instance<ResponseType>({

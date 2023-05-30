@@ -1,17 +1,16 @@
 import { NextFunction } from "express";
-import { handleExternalErrors } from "./handleExternalErrors";
+import ExternalError from "./External/externalErrors";
 import handleServiceErrors from "./handleServiceErrors";
+import BaseError from "./HTTP/httpErrors";
 import ServiceError from "./Services/serviceErrors";
+import { JobError } from "../../../utils/errors";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const checkAndHandleErrors = (err: any, next: NextFunction) => {
-  switch (true) {
-    case err instanceof handleExternalErrors:
-      handleExternalErrors(err);
-      break;
-    case err instanceof ServiceError:
-      handleServiceErrors(err);
-      break;
-  }
-  next(err);
+const checkAndHandleErrors = (
+  error: ServiceError | JobError | Error | unknown,
+  next: NextFunction
+) => {
+  if (error instanceof ServiceError) handleServiceErrors(error);
+  next(error);
 };
+
+export { checkAndHandleErrors, ExternalError, ServiceError, BaseError };

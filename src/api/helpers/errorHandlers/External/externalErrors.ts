@@ -1,34 +1,40 @@
+import { AxiosError } from "axios";
 import externalErrors from "./externalErrorsEnum";
 
-interface BaseError {
-  error: Error | { status: number; message: string };
-  thirdParty: string;
-  status?: number;
-}
-
 class BaseError extends Error {
+  message: string;
+  status: number;
+
   constructor(
     errorName: string,
-    externalInfo: Error | { status: number; message: string }
+    externalError: Error | AxiosError | { status: number; message: string }
   ) {
     super(errorName);
-    console.error(`[${errorName}]`, externalInfo);
     Object.setPrototypeOf(this, new.target.prototype);
-    this.error = externalInfo;
+
+    if (externalError instanceof AxiosError) {
+      this.status = externalError.response?.data.status;
+      this.message = externalError.response?.data.message;
+    } else if (externalError instanceof Error) {
+      this.status = 500;
+      this.message = externalError.message;
+    } else {
+      this.status = externalError.status;
+      this.message = externalError.message;
+    }
   }
 }
 
 class ExternalError extends BaseError {
   constructor(
     errorName: string,
-    externalInfo: Error | { status: number; message: string }
+    externalError: Error | AxiosError | { status: number; message: string }
   ) {
-    super(errorName, externalInfo);
+    super(errorName, externalError);
     const thirdPartyName = externalErrors[errorName];
 
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = thirdPartyName || "External error";
-    this.error = externalInfo;
     Error.captureStackTrace(this, this.constructor);
   }
 }

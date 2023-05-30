@@ -7,6 +7,7 @@
     "prepare": "husky install",
     "start": "node index.js",
     "build": "tsc",
+    "build-check": "tsc --noEmit",
     "dev": "tsc -w & node --watch dist",
     "lint": "eslint . --ext .ts,.js --ignore-path .gitignore --max-warnings=0",
     "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore",
@@ -28,12 +29,14 @@
     "cron": "^2.3.1",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
     "@types/cron": "^2.0.1",
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/morgan": "^1.9.4",
     "@types/morgan-json": "^1.1.0",
     "@types/node": "^20.2.3",

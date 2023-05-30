@@ -3,6 +3,9 @@ import morgan from "morgan";
 import helmet from "helmet";
 import morganJSON from "morgan-json";
 import { config } from "./env";
+import { MiddlewaresController } from "../middlewares";
+
+const { authMiddleware } = MiddlewaresController;
 
 // Router
 const router = Router();
@@ -10,6 +13,7 @@ const router = Router();
 // Middlewares
 router.use(helmet());
 router.use(json());
+router.use(authMiddleware);
 
 // Production Logger
 if (config.NODE_ENV === "production") {

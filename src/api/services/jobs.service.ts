@@ -2,6 +2,7 @@ import { Method } from "axios";
 import { StrictUnion } from "../../types";
 import { Job, AxiosJob } from "../../utils";
 import { SQSJob } from "../../utils/job/SQSJob";
+import { ServiceError } from "../helpers";
 
 class JobService {
   public static listRunningJobs() {
@@ -13,11 +14,14 @@ class JobService {
   }
 
   public static getJob(name: string) {
-    const job = Job.getJobByName(name);
-    const axiosJob = AxiosJob.getJobByName(name);
-    const sqsJob = SQSJob.getJobByName(name);
+    const job =
+      Job.getJobByName(name) ||
+      AxiosJob.getJobByName(name) ||
+      SQSJob.getJobByName(name);
 
-    return axiosJob?.toJSON() || job?.toJSON() || sqsJob?.toJSON();
+    if (!job) throw new ServiceError("not_found", "Job not found");
+
+    return job.toJSON();
   }
 
   public static findSimilarJobs({
@@ -119,8 +123,8 @@ class JobService {
           body,
           headers,
         });
-
         job.start();
+        return job.toJSON();
       }
 
       if (queueType === "fifo" && messageDeduplicationId && messageGroupId) {
@@ -135,8 +139,8 @@ class JobService {
           messageDeduplicationId,
           body,
         });
-
         job.start();
+        return job.toJSON();
       }
 
       if (queueType === "standard") {
@@ -149,8 +153,8 @@ class JobService {
           queueType,
           body,
         });
-
         job.start();
+        return job.toJSON();
       }
     }
 
@@ -165,8 +169,8 @@ class JobService {
           body,
           headers,
         });
-
         job.start();
+        return job.toJSON();
       }
 
       if (queueType === "fifo" && messageDeduplicationId && messageGroupId) {
@@ -180,8 +184,8 @@ class JobService {
           messageDeduplicationId,
           body,
         });
-
         job.start();
+        return job.toJSON();
       }
 
       if (queueType === "standard") {
@@ -193,8 +197,8 @@ class JobService {
           queueType,
           body,
         });
-
         job.start();
+        return job.toJSON();
       }
     }
   }
@@ -221,88 +225,100 @@ class JobService {
       AxiosJob.getJobByName(name) ||
       SQSJob.getJobByName(name);
 
-    if (!job) throw new Error("Job not found");
+    if (!job) throw new ServiceError("not_found", "Job not found");
 
     if (job instanceof AxiosJob) {
       if (timer) {
-        job.edit({
-          name,
-          description,
-          repetitions,
-          timer,
-          url,
-          query,
-          method,
-          body,
-          instance,
-        });
+        return job
+          .edit({
+            name,
+            description,
+            repetitions,
+            timer,
+            url,
+            query,
+            method,
+            body,
+            instance,
+          })
+          .toJSON();
       }
 
       if (cron) {
-        job.edit({
-          name,
-          description,
-          cron,
-          repetitions,
-          url,
-          query,
-          method,
-          body,
-          instance,
-        });
+        return job
+          .edit({
+            name,
+            description,
+            cron,
+            repetitions,
+            url,
+            query,
+            method,
+            body,
+            instance,
+          })
+          .toJSON();
       }
     }
 
     if (job instanceof SQSJob) {
       if (queueType === "fifo") {
         if (timer) {
-          job.edit({
-            name,
-            description,
-            repetitions,
-            timer,
-            queueUrl,
-            queueType,
-            messageGroupId,
-            messageDeduplicationId,
-          });
+          return job
+            .edit({
+              name,
+              description,
+              repetitions,
+              timer,
+              queueUrl,
+              queueType,
+              messageGroupId,
+              messageDeduplicationId,
+            })
+            .toJSON();
         }
 
         if (cron) {
-          job.edit({
-            name,
-            description,
-            cron,
-            repetitions,
-            queueUrl,
-            queueType,
-            messageGroupId,
-            messageDeduplicationId,
-          });
+          return job
+            .edit({
+              name,
+              description,
+              cron,
+              repetitions,
+              queueUrl,
+              queueType,
+              messageGroupId,
+              messageDeduplicationId,
+            })
+            .toJSON();
         }
       }
 
       if (queueType === "standard") {
         if (timer) {
-          job.edit({
-            name,
-            description,
-            repetitions,
-            timer,
-            queueUrl,
-            queueType,
-          });
+          return job
+            .edit({
+              name,
+              description,
+              repetitions,
+              timer,
+              queueUrl,
+              queueType,
+            })
+            .toJSON();
         }
 
         if (cron) {
-          job.edit({
-            name,
-            description,
-            cron,
-            repetitions,
-            queueUrl,
-            queueType,
-          });
+          return job
+            .edit({
+              name,
+              description,
+              cron,
+              repetitions,
+              queueUrl,
+              queueType,
+            })
+            .toJSON();
         }
       }
     }
@@ -314,7 +330,7 @@ class JobService {
       AxiosJob.getJobByName(name) ||
       SQSJob.getJobByName(name);
 
-    if (!job) throw new Error("Job not found");
+    if (!job) throw new ServiceError("not_found", "Job not found");
 
     job.stop();
   }
