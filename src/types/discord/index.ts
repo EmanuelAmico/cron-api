@@ -1,12 +1,3 @@
-import { Method } from "axios";
-
-export interface IFetchAPI {
-  url: string;
-  method: Method;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  body?: { [key: string]: any };
-}
-
 export type ChannelType =
   | "GUILD_TEXT"
   | "DM"

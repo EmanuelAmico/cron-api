@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from "express";
-
 type UnionKeys<T> = T extends T ? keyof T : never;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StrictUnionHelper<T, TAll> = T extends any
   ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>>
   : never;

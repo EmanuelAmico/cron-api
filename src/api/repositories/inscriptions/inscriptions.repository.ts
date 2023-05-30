@@ -338,7 +338,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<IInscriptionsRole[]>
       >({
         method: "GET",
-        url: `/roles`,
+        url: "/roles",
       });
       return response.content;
     } catch (error) {
