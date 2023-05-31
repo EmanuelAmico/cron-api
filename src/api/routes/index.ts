@@ -1,8 +1,8 @@
 import { Router } from "express";
-import jobRoutes from "./jobs.routes";
+import { jobRoutes } from "@routes/jobs.routes";
 
 const router = Router();
 
 router.use("/jobs", jobRoutes);
 
-export default router;
+export { router as allRoutes };

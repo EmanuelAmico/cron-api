@@ -1,4 +1,4 @@
-import { StrictUnion } from "../../helpers";
+import { StrictUnion } from "@types";
 
 export type JobDescription = {
   name: string;

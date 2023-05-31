@@ -1,4 +1,4 @@
-import { JobError } from "../../../utils/errors";
+import { JobError } from "@utils";
 
 export interface IResponse<T = unknown> {
   message: string;

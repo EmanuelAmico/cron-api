@@ -1,15 +1,18 @@
 import { CronJob, CronTime } from "cron";
-import { IJob, StrictUnion } from "../../types";
+import { IJob, StrictUnion } from "@types";
 import {
   formattedDate,
   formattedNowDate,
   timeDifferenceInMs,
   timeRemaining,
-} from "../date";
-import { filterSimilar, findMostSimilar, pick } from "../helpers";
-import { AxiosJob } from "./AxiosJob";
-import { SQSJob } from "./SQSJob";
-import { JobError, handleJobError } from "../errors";
+  filterSimilar,
+  findMostSimilar,
+  pick,
+  AxiosJob,
+  SQSJob,
+  JobError,
+  handleJobError,
+} from "@utils";
 
 class Job implements IJob {
   declare ["constructor"]: typeof Job;

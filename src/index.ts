@@ -1,2 +1,2 @@
-import "./api";
-import "./jobs";
+import "@api";
+import "@jobs";

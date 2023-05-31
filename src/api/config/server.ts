@@ -2,8 +2,8 @@ import { Router, json } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import morganJSON from "morgan-json";
-import { config } from "./env";
-import { MiddlewaresController } from "../middlewares";
+import { config } from "@config";
+import { MiddlewaresController } from "@middlewares";
 
 const { authMiddleware } = MiddlewaresController;
 

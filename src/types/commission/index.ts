@@ -1,4 +1,4 @@
-import { ICohort, IUser } from "../";
+import { ICohort, IUser } from "@types";
 
 export interface ICommission {
   readonly id: number;

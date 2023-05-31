@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
-import { config } from "../../config";
-import { ServiceError } from "../errorHandlers";
+import { ServiceError } from "@helpers";
+import { config } from "@config";
 
 const { API_SECRET } = config;
 

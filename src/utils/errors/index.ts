@@ -1,6 +1,6 @@
-import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { AxiosError } from "axios";
-import { AxiosJob, Job, SQSJob } from "../job";
+import { SQSServiceException } from "@aws-sdk/client-sqs";
+import { AxiosJob, Job, SQSJob } from "@utils";
 
 type TJobError = Error | AxiosError | SQSServiceException;
 

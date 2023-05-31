@@ -1,13 +1,13 @@
-import ExternalError from "../../helpers/errorHandlers/External/externalErrors";
-import discordAPI from "./discord.instance";
+import { ExternalError } from "@helpers";
 import {
   ICreateCourseBlock,
   IDeleteCourseBlock,
   ICreateCourseBlockResponse,
   IUpdateUserRole,
-} from "../../../types/discord";
+} from "@types";
+import { discordAPI } from "@repositories";
 
-class DiscordRepository {
+export class DiscordRepository {
   public static async createCourse(body: ICreateCourseBlock) {
     try {
       const response = await discordAPI<ICreateCourseBlockResponse>({
@@ -67,4 +67,3 @@ class DiscordRepository {
     }
   }
 }
-export default DiscordRepository;

@@ -33,7 +33,7 @@ export interface IRoleData {
   mentionable?: boolean;
 }
 
-export interface IRole extends IRoleData {
+export interface IDiscordRole extends IRoleData {
   readonly id: string;
 }
 

@@ -6,7 +6,7 @@ import {
   IPaginationResponse,
   IPaginationRequest,
   IInscriptionsRole,
-} from "../";
+} from "@types";
 
 export interface IUser {
   readonly id: number;

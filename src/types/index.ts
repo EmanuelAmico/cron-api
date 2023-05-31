@@ -1,7 +1,9 @@
+export * from "./api";
 export * from "./axios";
 export * from "./cohort";
 export * from "./commission";
 export * from "./course";
+export * from "./discord";
 export * from "./email";
 export * from "./helpers";
 export * from "./job";
@@ -10,4 +12,3 @@ export * from "./pipedrive";
 export * from "./role";
 export * from "./timer";
 export * from "./user";
-export * from "./api";

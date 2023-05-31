@@ -1,13 +1,11 @@
-import { ISQSJob, StrictUnion } from "../../types";
-import { Job } from ".";
-import { filterSimilar, pick } from "../helpers";
-import { config } from "../../api/config";
 import {
   SQSClient,
   SQSServiceException,
   SendMessageCommand,
 } from "@aws-sdk/client-sqs";
-import { JobError } from "../errors";
+import { Job, filterSimilar, pick, JobError } from "@utils";
+import { ISQSJob, StrictUnion } from "@types";
+import { config } from "@config";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 

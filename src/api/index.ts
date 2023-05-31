@@ -1,11 +1,14 @@
 import express, { NextFunction, Request, Response } from "express";
-import serverConfig from "./config/server";
-import routes from "./routes";
 import morganBody from "morgan-body";
-import { config } from "./config/env";
-import { ApiErrors } from "./helpers/errorHandlers/HTTP/httpErrors";
-import { formattedNowDate } from "../utils";
-import { ExternalError, IErrorResponse, ServiceError } from "./helpers";
+import { config, serverConfig } from "@config";
+import { formattedNowDate } from "@utils";
+import {
+  ExternalError,
+  IErrorResponse,
+  ServiceError,
+  ApiErrors,
+} from "./helpers";
+import { allRoutes } from "@routes/index";
 
 const { NODE_ENV, PORT } = config;
 
@@ -23,7 +26,7 @@ if (NODE_ENV === "local" || NODE_ENV === "development") {
 app.use(serverConfig);
 
 // Routes
-app.use("/", routes);
+app.use("/", allRoutes);
 
 // Error handler
 app.use(

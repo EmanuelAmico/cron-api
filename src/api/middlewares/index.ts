@@ -1,9 +1,5 @@
-import { validateAndDecodeAPIToken } from "../helpers";
-import {
-  Api401Error,
-  Api403Error,
-} from "../helpers/errorHandlers/HTTP/httpErrors";
 import { NextFunction, Request, Response } from "express";
+import { validateAndDecodeAPIToken, Api401Error, Api403Error } from "@helpers";
 
 export class MiddlewaresController {
   public static async authMiddleware(

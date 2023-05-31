@@ -1,4 +1,4 @@
-import internalErrors from "./internalErrors";
+import { internalErrors } from "@helpers";
 
 interface BaseError {
   error: string;
@@ -17,7 +17,7 @@ class BaseError extends Error {
   }
 }
 
-class ServiceError extends BaseError {
+export class ServiceError extends BaseError {
   constructor(error: string, message: string) {
     super(error, message);
     const { code, name } = internalErrors[error];
@@ -29,5 +29,3 @@ class ServiceError extends BaseError {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-export default ServiceError;

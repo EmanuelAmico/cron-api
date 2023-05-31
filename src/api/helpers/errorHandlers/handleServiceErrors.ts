@@ -1,7 +1,6 @@
-import httpStatusCodes from "./HTTP/httpCodes";
-import ServiceError from "./Services/serviceErrors";
+import { httpStatusCodes, ServiceError } from "@helpers";
 
-const handleServiceErrors = (error: ServiceError) => {
+export const handleServiceErrors = (error: ServiceError) => {
   switch (error.internalError) {
     case 1:
       error.status = httpStatusCodes.NOT_FOUND;
@@ -17,5 +16,3 @@ const handleServiceErrors = (error: ServiceError) => {
       break;
   }
 };
-
-export default handleServiceErrors;

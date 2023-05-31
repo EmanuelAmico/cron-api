@@ -1,5 +1,5 @@
-import { Api400Error } from "../errorHandlers/HTTP/httpErrors";
-import { IParameter } from "../../../types";
+import { Api400Error } from "@helpers";
+import { IParameter } from "@types";
 
 const checkRequiredParameters = (
   object: {
@@ -112,7 +112,7 @@ const checkTypeOf = (
   }
 };
 
-const checkProperties = (
+export const checkProperties = (
   object: {
     [key: string]:
       | object
@@ -146,5 +146,3 @@ const checkProperties = (
     }
   });
 };
-
-export { checkProperties };

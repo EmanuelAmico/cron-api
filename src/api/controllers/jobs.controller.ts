@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { JobService } from "../services";
-import { JobDescription } from "../../types";
-import { checkProperties, created, IResponse, ok } from "../helpers";
 import { Method } from "axios";
+import { JobService } from "@services";
+import { JobDescription } from "@types";
+import { checkProperties, created, IResponse, ok } from "@helpers";
 
 class JobsController {
   public static listRunningJobs(

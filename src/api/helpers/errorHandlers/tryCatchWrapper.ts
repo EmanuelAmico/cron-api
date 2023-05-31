@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { checkAndHandleErrors } from "../errorHandlers";
+import { checkAndHandleErrors } from "@helpers";
 
 export const tryCatch =
   <

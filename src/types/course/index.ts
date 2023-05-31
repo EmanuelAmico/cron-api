@@ -1,4 +1,4 @@
-import { ICohort, StrictUnion } from "../";
+import { ICohort, StrictUnion } from "@types";
 
 export interface CourseType {
   readonly id: number;

@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import externalErrors from "./externalErrorsEnum";
+import { externalErrors } from "@helpers";
 
 class BaseError extends Error {
   message: string;
@@ -39,4 +39,4 @@ class ExternalError extends BaseError {
   }
 }
 
-export default ExternalError;
+export { ExternalError };

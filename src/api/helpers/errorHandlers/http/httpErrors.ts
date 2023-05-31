@@ -1,4 +1,4 @@
-import httpStatusCodes from "./httpCodes";
+import { httpStatusCodes } from "@helpers";
 
 interface BaseError {
   message: string;
@@ -75,5 +75,3 @@ export type ApiErrors =
   | Api404Error
   | Api409Error
   | Api500Error;
-
-export default BaseError;

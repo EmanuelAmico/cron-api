@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { JobsController } from "../controllers";
-import { tryCatch } from "../helpers/errorHandlers/tryCatchWrapper";
+import { JobsController } from "@controllers";
+import { tryCatch } from "@helpers";
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router
   .put(tryCatch(JobsController.editJob))
   .delete(tryCatch(JobsController.deleteJob));
 
-export default router;
+export { router as jobRoutes };

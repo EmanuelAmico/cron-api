@@ -31,17 +31,17 @@
     "baseUrl": "./src/" /* Specify the base directory to resolve non-relative module names. */,
     "paths": {
       "@/*": ["*"],
-      "@api": ["api/index"],
-      "@types": ["types/index"],
-      "@jobs": ["jobs/index"],
-      "@utils": ["utils/index"],
-      "@config": ["api/config/index"],
-      "@controllers": ["api/controllers/index"],
-      "@helpers": ["api/helpers/index"],
-      "@middlewares": ["api/middlewares/index"],
-      "@repositories": ["api/repositories/index"],
-      "@routes": ["api/routes/index"],
-      "@services": ["api/services/index"]
+      "@api": ["api/index.ts"],
+      "@types": ["types/index.ts"],
+      "@jobs": ["jobs/index.ts"],
+      "@utils": ["utils/index.ts"],
+      "@config": ["api/config/index.ts"],
+      "@controllers": ["api/controllers/index.ts"],
+      "@helpers": ["api/helpers/index.ts"],
+      "@middlewares": ["api/middlewares/index.ts"],
+      "@repositories": ["api/repositories/index.ts"],
+      "@routes/*": ["api/routes/*"],
+      "@services": ["api/services/index.ts"]
     } /* Specify a set of entries that re-map imports to additional lookup locations. */,
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

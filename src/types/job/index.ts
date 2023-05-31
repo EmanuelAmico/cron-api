@@ -1,7 +1,6 @@
-import { AxiosJob, Job } from "../../utils";
-import { SQSJob } from "../../utils/job/SQSJob";
+import { Job, AxiosJob, SQSJob } from "@utils";
 
-// The minimum and necessary to create a Job | AxiosJob | SQSJob
+// The minimum and necessary data to create a Job | AxiosJob | SQSJob
 export interface IJob {
   readonly name: string;
   readonly description: string;

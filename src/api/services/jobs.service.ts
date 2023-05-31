@@ -1,10 +1,9 @@
 import { Method } from "axios";
-import { StrictUnion } from "../../types";
-import { Job, AxiosJob } from "../../utils";
-import { SQSJob } from "../../utils/job/SQSJob";
-import { ServiceError } from "../helpers";
+import { StrictUnion } from "@types";
+import { Job, AxiosJob, SQSJob } from "@utils";
+import { ServiceError } from "@helpers";
 
-class JobService {
+export class JobService {
   public static listRunningJobs() {
     const jobs = Job.listRunningJobs();
     const axiosJobs = AxiosJob.listRunningJobs();
@@ -335,5 +334,3 @@ class JobService {
     job.stop();
   }
 }
-
-export { JobService };
