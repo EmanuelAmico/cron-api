@@ -3,9 +3,10 @@ import {
   SQSServiceException,
   SendMessageCommand,
 } from "@aws-sdk/client-sqs";
-import { Job, filterSimilar, pick, JobError } from "@utils";
+import { filterSimilar, pick, JobError } from "@utils";
 import { ISQSJob, StrictUnion } from "@types";
 import { config } from "@config";
+import { Job } from "../job";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 

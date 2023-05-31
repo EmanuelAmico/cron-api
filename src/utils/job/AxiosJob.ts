@@ -1,6 +1,7 @@
 import { Method } from "axios";
-import { Job, generateInstance, filterSimilar, pick } from "@utils";
+import { generateInstance, filterSimilar, pick } from "@utils";
 import { IAxiosJob, StrictUnion } from "@types";
+import { Job } from "../job";
 
 class AxiosJob<BodyType = unknown, ResponseType = unknown>
   extends Job

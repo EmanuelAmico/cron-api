@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prepare": "husky install",
-    "start": "node index.js",
+    "start": "node dist",
     "build": "tsc && tsc-alias",
     "build-check": "tsc --noEmit",
     "dev": "tsc -w & tsc-alias -w & node --watch dist",
