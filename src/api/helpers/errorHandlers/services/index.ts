@@ -1,2 +1,2 @@
-export * from "./internalErrors";
-export * from "./serviceErrors";
+export * from "./internalErrors.js";
+export * from "./serviceErrors.js";

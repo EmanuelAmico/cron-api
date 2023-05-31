@@ -1,2 +1,2 @@
-export * from "./httpCodes";
-export * from "./httpErrors";
+export * from "./httpCodes.js";
+export * from "./httpErrors.js";

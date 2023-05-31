@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Cron API",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "prepare": "husky install",
     "start": "node dist",

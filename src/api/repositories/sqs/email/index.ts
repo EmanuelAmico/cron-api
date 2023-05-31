@@ -1,1 +1,1 @@
-export * from "./email.repository";
+export * from "./email.repository.js";

@@ -1,2 +1,2 @@
-export * from "./inscriptions.instance";
-export * from "./inscriptions.repository";
+export * from "./inscriptions.instance.js";
+export * from "./inscriptions.repository.js";
