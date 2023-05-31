@@ -7,7 +7,7 @@ import {
   IErrorResponse,
   ServiceError,
   ApiErrors,
-} from "./helpers";
+} from "@helpers";
 import { allRoutes } from "@routes/index.js";
 
 const { NODE_ENV, PORT } = config;
