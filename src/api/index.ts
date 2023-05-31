@@ -8,7 +8,7 @@ import {
   ServiceError,
   ApiErrors,
 } from "@helpers";
-import { allRoutes } from "@routes/index.js";
+import { allRoutes } from "@routes";
 
 const { NODE_ENV, PORT } = config;
 

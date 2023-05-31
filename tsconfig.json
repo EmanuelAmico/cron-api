@@ -14,7 +14,7 @@
       "@helpers": ["api/helpers/index.ts"],
       "@middlewares": ["api/middlewares/index.ts"],
       "@repositories": ["api/repositories/index.ts"],
-      "@routes/*": ["api/routes/*"],
+      "@routes": ["api/routes/index.ts"],
       "@services": ["api/services/index.ts"]
     },
     "outDir": "./dist",
