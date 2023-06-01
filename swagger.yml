@@ -1,125 +1,22 @@
 openapi: 3.0.0
 info:
-  title: BFF Template
-  description: >-
-    # **BFF Template**
-
-
-    ### This API provides a simplified interface for accessing _endpoints for_
-    _`schemaNames`_ which `ProjectName` consumes.
-
-
-    ### **It acts as a facade, hiding the complexity of the underlying services
-    and providing a tailored interface for the frontend of the application.**
-
-
-    ---
-
-
-    > BFF comunicates with:
-
-
-    - `API / Service Name`
-
-    - `API / Service Name`
-
-    - `API / Service Name`
-
-    - `API / Service Name`
-
-    - `API / Service Name`
-        
-
-    ---
-
-
-    [Link to GitLab Repository](https://gitlab.com/plataforma-5/bff-template)
-
-
-    ---
-
-
-    ⠀⠀⠀⢠⣾⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⠀⠀⣰⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⠀⢰⣿⣿⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⣄⣀⣀⣤⣤⣶⣾⣿⣿⣿⡷  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀  
-
-    ⣿⣿⣿⡇⠀⡾⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣧⡀⠁⣀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠉⢹⠉⠙⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣀⠀⣀⣼⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠀⠤⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⠿⠋⢃⠈⠢⡁⠒⠄⡀⠈⠁⠀⠀⠀⠀⠀⠀⠀  
-
-    ⣿⣿⠟⠁⠀⠀⠈⠉⠉⠁⠀⠀⠀⠀⠈⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  
-
-    ⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
-
-    ⢯⣿⣞⡷⣯⣟⣿⣳⣯⣟⣾⢯⣷⢯⣟⣯⣿⣽⣻⢯⣿⣻  
-
-    ⣯⡿⣞⣿⣳⢿⣽⣻⡾⣯⣟⣷⢿⣽⣻⢾⣯⣟⡷⣿⣽⣻  
-
-    ⣽⣻⠇⠀⠀⠀⠀⠀⠈⠙⢽⡾⣧⠀⠀⠀⠀⠀⠀⣿⣞⣷⣷  
-
-    ⣻⣽⡇⠀⠀⣿⣟⣶⠄⠀⠈⣿⠇⠀⠀⣿⣟⣿⣻⢷⣻⡾⢷  
-
-    ⣟⣾⡅⠀⠀⣿⣻⢾⠃⠀⠀⣿⠇⠀⠘⠁⠉⠈⠻⣻⣽⣟⢷  
-
-    ⡿⣽⡆⠀⠀⠀⠀⠀⠀⣀⣼⡿⣶⢶⣴⡿⣆⠀⠀⢻⣳⣯⢷  
-
-    ⢿⣯⠇⠀⠀⣷⣿⣻⣟⣯⡿⣽⠋⠛⢳⣿⡻⠀⠀⢸⣯⢷  
-
-    ⣟⣾⡇⠀⠀⣿⣷⣻⣾⣽⣻⣽⣆⠀⠀⠉⠁⠀⣠⡿⣽⣻  
-
-    ⢿⣞⣧⣤⣤⡿⣞⣷⣟⣾⣽⣳⣯⣷⡶⣴⡶⣾⢯⣟⡿⣽  
-
-    ⢯⣿⣞⡷⣯⣟⣿⣳⣯⣟⣾⢯⣷⢯⣟⣯⣿⣽⣻⢯⣿⣻
-
-
-    ---
+  title: Plataforma5 - Cron API
   version: 1.0.0
 servers:
-  - url: http://localhost:5000
-tags:
-  - name: Example
-    description: |-
-      #### **This contains all** _**Example**_ **related requests**
-
-      > Routes for _**example**_
-
-      - `GET /example`
+  - url: http://{{cronapi}}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
 paths:
-  /example:
+  /jobs:
     get:
       tags:
-        - Example
-      summary: Get example
-      description: Get "Hello World" example from server
+        - default
+      summary: List all running jobs
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: OK
@@ -133,10 +30,6 @@ paths:
                   data:;object-src 'none';script-src 'self';script-src-attr
                   'none';style-src 'self' https:
                   'unsafe-inline';upgrade-insecure-requests
-            Cross-Origin-Embedder-Policy:
-              schema:
-                type: string
-                example: require-corp
             Cross-Origin-Opener-Policy:
               schema:
                 type: string
@@ -145,50 +38,42 @@ paths:
               schema:
                 type: string
                 example: same-origin
-            X-DNS-Prefetch-Control:
-              schema:
-                type: string
-                example: 'off'
-            X-Frame-Options:
-              schema:
-                type: string
-                example: SAMEORIGIN
-            Strict-Transport-Security:
-              schema:
-                type: string
-                example: max-age=15552000; includeSubDomains
-            X-Download-Options:
-              schema:
-                type: string
-                example: noopen
-            X-Content-Type-Options:
-              schema:
-                type: string
-                example: nosniff
             Origin-Agent-Cluster:
               schema:
                 type: string
                 example: '?1'
-            X-Permitted-Cross-Domain-Policies:
-              schema:
-                type: string
-                example: none
             Referrer-Policy:
               schema:
                 type: string
                 example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
             X-XSS-Protection:
               schema:
                 type: integer
                 example: '0'
-            Vary:
-              schema:
-                type: string
-                example: Origin
-            Access-Control-Allow-Credentials:
-              schema:
-                type: boolean
-                example: 'true'
             Content-Type:
               schema:
                 type: string
@@ -196,15 +81,15 @@ paths:
             Content-Length:
               schema:
                 type: integer
-                example: '26'
+                example: '1283'
             ETag:
               schema:
                 type: string
-                example: W/"1a-T7vCLEZV7pLSyUzkr9XBdG32YU8"
+                example: W/"503-LSGvWKz9tpw7toiS8VDqTG+GSbg"
             Date:
               schema:
                 type: string
-                example: Thu, 15 Dec 2022 17:09:22 GMT
+                example: Thu, 01 Jun 2023 06:41:57 GMT
             Connection:
               schema:
                 type: string
@@ -218,20 +103,83 @@ paths:
               schema:
                 type: object
               example:
-                message: Hello world!
+                status: 200
+                message: Running jobs
+                data:
+                  - name: example-job
+                    description: This is an example job
+                    cron: '* * * * *'
+                    repetitions: 5
+                    remainingRepetitions: 5
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 03:42
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 0
+                      seconds: 2
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job2
+                    description: This is an example job
+                    cron: '* * * * *'
+                    repetitions: 5
+                    remainingRepetitions: 5
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 03:42
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 0
+                      seconds: 2
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job3
+                    description: This is an example job
+                    cron: 10 * * * *
+                    repetitions: 5
+                    remainingRepetitions: 5
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 04:10
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 28
+                      seconds: 2
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job4
+                    description: This is an example job
+                    cron: 10 * * * *
+                    repetitions: 3
+                    remainingRepetitions: 3
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 04:10
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 28
+                      seconds: 2
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
     post:
       tags:
-        - Example
-      summary: Post example
-      description: Returns the same body sent in request
+        - default
+      summary: Create a cron or timer job
       requestBody:
         content:
           application/json:
             schema:
               type: object
               example:
-                message: This is a testing example of post
-                testing: true
+                name: test-job
+                description: A test Job
+                cron: '* * * * *'
+                url: https://www.google.com.ar
+                method: GET
+                repetitions: 100
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: OK
@@ -245,10 +193,6 @@ paths:
                   data:;object-src 'none';script-src 'self';script-src-attr
                   'none';style-src 'self' https:
                   'unsafe-inline';upgrade-insecure-requests
-            Cross-Origin-Embedder-Policy:
-              schema:
-                type: string
-                example: require-corp
             Cross-Origin-Opener-Policy:
               schema:
                 type: string
@@ -257,50 +201,42 @@ paths:
               schema:
                 type: string
                 example: same-origin
-            X-DNS-Prefetch-Control:
-              schema:
-                type: string
-                example: 'off'
-            X-Frame-Options:
-              schema:
-                type: string
-                example: SAMEORIGIN
-            Strict-Transport-Security:
-              schema:
-                type: string
-                example: max-age=15552000; includeSubDomains
-            X-Download-Options:
-              schema:
-                type: string
-                example: noopen
-            X-Content-Type-Options:
-              schema:
-                type: string
-                example: nosniff
             Origin-Agent-Cluster:
               schema:
                 type: string
                 example: '?1'
-            X-Permitted-Cross-Domain-Policies:
-              schema:
-                type: string
-                example: none
             Referrer-Policy:
               schema:
                 type: string
                 example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
             X-XSS-Protection:
               schema:
                 type: integer
                 example: '0'
-            Vary:
-              schema:
-                type: string
-                example: Origin
-            Access-Control-Allow-Credentials:
-              schema:
-                type: boolean
-                example: 'true'
             Content-Type:
               schema:
                 type: string
@@ -308,15 +244,15 @@ paths:
             Content-Length:
               schema:
                 type: integer
-                example: '71'
+                example: '392'
             ETag:
               schema:
                 type: string
-                example: W/"47-GxM6XagBY/ejlVSb7USg6eCbsQc"
+                example: W/"188-G4EOVAMshpsWy9raiRdOFxSbkkM"
             Date:
               schema:
                 type: string
-                example: Thu, 15 Dec 2022 17:12:36 GMT
+                example: Thu, 01 Jun 2023 06:42:29 GMT
             Connection:
               schema:
                 type: string
@@ -330,6 +266,494 @@ paths:
               schema:
                 type: object
               example:
-                body:
-                  message: This is a testing example of post
-                  testing: true
+                status: 201
+                message: Job created
+                data:
+                  name: test-job
+                  description: A test Job
+                  cron: '* * * * *'
+                  repetitions: 100
+                  remainingRepetitions: 100
+                  executionTimes: 0
+                  nextRunDate: 01/06/2023, 03:43
+                  nextRunTimeRemaining:
+                    days: 0
+                    hours: 0
+                    minutes: 0
+                    seconds: 30
+                  createdAt: 01/06/2023, 03:42
+                  updatedAt: 01/06/2023, 03:42
+                  url: https://www.google.com.ar/
+                  method: GET
+  /jobs/test-job:
+    get:
+      tags:
+        - default
+      summary: Get job by name
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Security-Policy:
+              schema:
+                type: string
+                example: >-
+                  default-src 'self';base-uri 'self';font-src 'self' https:
+                  data:;form-action 'self';frame-ancestors 'self';img-src 'self'
+                  data:;object-src 'none';script-src 'self';script-src-attr
+                  'none';style-src 'self' https:
+                  'unsafe-inline';upgrade-insecure-requests
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+                example: '?1'
+            Referrer-Policy:
+              schema:
+                type: string
+                example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
+            X-XSS-Protection:
+              schema:
+                type: integer
+                example: '0'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '390'
+            ETag:
+              schema:
+                type: string
+                example: W/"186-pM89E9OaWxoFRlm9tRADQlbFqKE"
+            Date:
+              schema:
+                type: string
+                example: Thu, 01 Jun 2023 06:42:36 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: 200
+                message: Job found
+                data:
+                  name: test-job
+                  description: A test Job
+                  cron: '* * * * *'
+                  repetitions: 100
+                  remainingRepetitions: 100
+                  executionTimes: 0
+                  nextRunDate: 01/06/2023, 03:43
+                  nextRunTimeRemaining:
+                    days: 0
+                    hours: 0
+                    minutes: 0
+                    seconds: 24
+                  createdAt: 01/06/2023, 03:42
+                  updatedAt: 01/06/2023, 03:42
+                  url: https://www.google.com.ar/
+                  method: GET
+    put:
+      tags:
+        - default
+      summary: Edit a running job by name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                cron: 6 11 * * *
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Security-Policy:
+              schema:
+                type: string
+                example: >-
+                  default-src 'self';base-uri 'self';font-src 'self' https:
+                  data:;form-action 'self';frame-ancestors 'self';img-src 'self'
+                  data:;object-src 'none';script-src 'self';script-src-attr
+                  'none';style-src 'self' https:
+                  'unsafe-inline';upgrade-insecure-requests
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+                example: '?1'
+            Referrer-Policy:
+              schema:
+                type: string
+                example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
+            X-XSS-Protection:
+              schema:
+                type: integer
+                example: '0'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '391'
+            ETag:
+              schema:
+                type: string
+                example: W/"187-06NPzQcIaqhTMbiT0BIHrkLBGdU"
+            Date:
+              schema:
+                type: string
+                example: Thu, 01 Jun 2023 06:42:57 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: 200
+                message: Job edited
+                data:
+                  name: test-job
+                  description: A test Job
+                  cron: 6 11 * * *
+                  repetitions: 100
+                  remainingRepetitions: 100
+                  executionTimes: 0
+                  nextRunDate: 01/06/2023, 03:43
+                  nextRunTimeRemaining:
+                    days: 0
+                    hours: 0
+                    minutes: 0
+                    seconds: 2
+                  createdAt: 01/06/2023, 03:42
+                  updatedAt: 01/06/2023, 03:42
+                  url: https://www.google.com.ar/
+                  method: GET
+    delete:
+      tags:
+        - default
+      summary: Remove a running job by  name
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Content-Security-Policy:
+              schema:
+                type: string
+                example: >-
+                  default-src 'self';base-uri 'self';font-src 'self' https:
+                  data:;form-action 'self';frame-ancestors 'self';img-src 'self'
+                  data:;object-src 'none';script-src 'self';script-src-attr
+                  'none';style-src 'self' https:
+                  'unsafe-inline';upgrade-insecure-requests
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+                example: '?1'
+            Referrer-Policy:
+              schema:
+                type: string
+                example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
+            X-XSS-Protection:
+              schema:
+                type: integer
+                example: '0'
+            ETag:
+              schema:
+                type: string
+                example: W/"a-bAsFyilMr4Ra1hIU5PyoyFRunpI"
+            Date:
+              schema:
+                type: string
+                example: Thu, 01 Jun 2023 06:43:07 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: null
+  /jobs/search:
+    get:
+      tags:
+        - default
+      summary: Search for similar jobs by query
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          example: example
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Security-Policy:
+              schema:
+                type: string
+                example: >-
+                  default-src 'self';base-uri 'self';font-src 'self' https:
+                  data:;form-action 'self';frame-ancestors 'self';img-src 'self'
+                  data:;object-src 'none';script-src 'self';script-src-attr
+                  'none';style-src 'self' https:
+                  'unsafe-inline';upgrade-insecure-requests
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+                example: same-origin
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+                example: '?1'
+            Referrer-Policy:
+              schema:
+                type: string
+                example: no-referrer
+            Strict-Transport-Security:
+              schema:
+                type: string
+                example: max-age=15552000; includeSubDomains
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+                example: 'off'
+            X-Download-Options:
+              schema:
+                type: string
+                example: noopen
+            X-Frame-Options:
+              schema:
+                type: string
+                example: SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+                example: none
+            X-XSS-Protection:
+              schema:
+                type: integer
+                example: '0'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '1287'
+            ETag:
+              schema:
+                type: string
+                example: W/"507-79FJ0mOyLO+gCX6bjxpUgIKbCSU"
+            Date:
+              schema:
+                type: string
+                example: Thu, 01 Jun 2023 06:42:43 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: 200
+                message: Similar jobs
+                data:
+                  - name: example-job
+                    description: This is an example job
+                    cron: '* * * * *'
+                    repetitions: 5
+                    remainingRepetitions: 4
+                    executionTimes: 1
+                    nextRunDate: 01/06/2023, 03:43
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 0
+                      seconds: 16
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job2
+                    description: This is an example job
+                    cron: '* * * * *'
+                    repetitions: 5
+                    remainingRepetitions: 4
+                    executionTimes: 1
+                    nextRunDate: 01/06/2023, 03:43
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 0
+                      seconds: 16
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job3
+                    description: This is an example job
+                    cron: 10 * * * *
+                    repetitions: 5
+                    remainingRepetitions: 5
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 04:10
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 27
+                      seconds: 16
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
+                  - name: example-job4
+                    description: This is an example job
+                    cron: 10 * * * *
+                    repetitions: 3
+                    remainingRepetitions: 3
+                    executionTimes: 0
+                    nextRunDate: 01/06/2023, 04:10
+                    nextRunTimeRemaining:
+                      days: 0
+                      hours: 0
+                      minutes: 27
+                      seconds: 16
+                    createdAt: 01/06/2023, 03:41
+                    updatedAt: 01/06/2023, 03:41
