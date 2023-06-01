@@ -23,4 +23,4 @@ if (config.NODE_ENV === "production") {
   router.use(morgan(format));
 }
 
-export default router;
+export { router as serverConfig };

@@ -1,2 +1,2 @@
-export * from "./env.js";
-export { default as serverConfig } from "./server.js";
+export * from "./env.config.js";
+export * from "./server.config.js";
