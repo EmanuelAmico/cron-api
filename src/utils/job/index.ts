@@ -1,3 +1,3 @@
-export * from "./Job.js";
-export * from "./AxiosJob.js";
-export * from "./SQSJob.js";
+export * from "./Job";
+export * from "./AxiosJob";
+export * from "./SQSJob";

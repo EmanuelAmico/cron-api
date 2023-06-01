@@ -1,3 +1,3 @@
-export * from "./discord/index.js";
-export * from "./inscriptions/index.js";
-export * from "./sqs/index.js";
+export * from "./discord/index";
+export * from "./inscriptions/index";
+export * from "./sqs/index";

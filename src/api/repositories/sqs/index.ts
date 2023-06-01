@@ -1,3 +1,3 @@
-export * from "./email/index.js";
-export * from "./pipedrive/index.js";
-export * from "./sqs.js";
+export * from "./email/index";
+export * from "./pipedrive/index";
+export * from "./sqs";

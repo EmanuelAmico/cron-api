@@ -7,9 +7,9 @@
   "scripts": {
     "prepare": "husky install",
     "start": "node dist",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias -f",
     "build-check": "tsc --noEmit",
-    "dev": "tsc -w & tsc-alias -w & node --watch dist",
+    "dev": "tsc-watch --onSuccess scripts/onSuccessScript.sh",
     "lint": "eslint . --ext .ts,.js --ignore-path .gitignore --max-warnings=0",
     "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -55,6 +55,7 @@
     "morgan-json": "^1.1.0",
     "prettier": "^2.8.8",
     "tsc-alias": "^1.8.6",
+    "tsc-watch": "^6.0.4",
     "typescript": "^5.0.4"
   }
 }

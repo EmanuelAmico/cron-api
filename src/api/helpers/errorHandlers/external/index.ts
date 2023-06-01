@@ -1,2 +1,2 @@
-export * from "./externalErrors.js";
-export * from "./externalErrorsEnum.js";
+export * from "./externalErrors";
+export * from "./externalErrorsEnum";

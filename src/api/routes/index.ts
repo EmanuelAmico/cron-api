@@ -1,2 +1,2 @@
-export * from "./index.routes.js";
-export * from "./jobs.routes.js";
+export * from "./jobs.routes";
+export * from "./index.routes";

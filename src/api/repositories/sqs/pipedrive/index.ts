@@ -1,1 +1,1 @@
-export * from "./pipedrive.repository.js";
+export * from "./pipedrive.repository";
