@@ -1,3 +1,3 @@
-export * from "./discord/index";
-export * from "./inscriptions/index";
-export * from "./sqs/index";
+export * from "./discord";
+export * from "./inscriptions";
+export * from "./sqs";
