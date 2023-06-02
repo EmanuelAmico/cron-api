@@ -1,13 +1,11 @@
-import { ISQSJob, StrictUnion } from "../../types";
-import { Job } from ".";
-import { filterSimilar, pick } from "../helpers";
-import { config } from "../../api/config";
 import {
   SQSClient,
   SQSServiceException,
   SendMessageCommand,
 } from "@aws-sdk/client-sqs";
-import { JobError } from "../errors";
+import { Job, filterSimilar, pick, JobError } from "@utils";
+import { ISQSJob, StrictUnion } from "@types";
+import { config } from "@config";
 
 const { SQS_ACCESS_KEY, SQS_SECRET_KEY } = config;
 
@@ -101,9 +99,6 @@ class SQSJob extends Job implements ISQSJob {
         }
       | { queueType: "standard" }
     >) {
-    if (SQSJob.runningJobs.find((job) => job.name === name))
-      throw new Error("A job with that name already exists.");
-
     const callback = async () => {
       try {
         await SQSJob.sqsClient.send(
@@ -141,7 +136,7 @@ class SQSJob extends Job implements ISQSJob {
     );
 
     if (queueType === "fifo" && !queueUrl.includes(".fifo"))
-      throw new Error(
+      throw new JobError(
         "You must provide a valid AWS SQS FIFO queue URL when creating a SQS FIFO job."
       );
 
@@ -332,17 +327,17 @@ class SQSJob extends Job implements ISQSJob {
     }
 
     if (queueUrl && !queueType)
-      throw new Error(
+      throw new JobError(
         "You must provide a queueType when changing a job's queueUrl"
       );
 
     if (queueType === "fifo" && (!messageGroupId || !messageDeduplicationId))
-      throw new Error(
+      throw new JobError(
         "You must provide a messageGroupId and a messageDeduplicationId when changing a job to fifo queue type"
       );
 
     if (queueType === "fifo" && !queueUrl.includes(".fifo"))
-      throw new Error(
+      throw new JobError(
         "You must provide a valid AWS SQS FIFO queue url when changing a job to fifo queue type"
       );
 

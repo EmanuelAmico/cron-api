@@ -1,5 +1,5 @@
-import { PredefinedJobs } from "../types";
-import { Job } from "../utils";
+import { PredefinedJobs } from "@types";
+import { Job } from "@utils";
 
 const jobs: PredefinedJobs = [
   new Job({

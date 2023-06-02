@@ -1,17 +1,11 @@
-import { Api400Error } from "../errorHandlers/HTTP/httpErrors";
-import { IParameter } from "../../../types";
+import { Api400Error } from "@helpers";
+import { IParameter } from "@types";
 
 const checkRequiredParameters = (
-  object: {
-    [key: string]:
-      | object
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown;
-  },
+  object: Record<
+    string,
+    object | string | number | boolean | null | undefined | unknown
+  >,
   representativeName: "req.query" | "req.body" | "req.params" | string,
   requiredParameters: string[]
 ) => {
@@ -25,16 +19,10 @@ const checkRequiredParameters = (
 };
 
 const checkAtLeastOneParameter = (
-  object: {
-    [key: string]:
-      | object
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown;
-  },
+  object: Record<
+    string,
+    object | string | number | boolean | null | undefined | unknown
+  >,
   representativeName: "req.query" | "req.body" | "req.params" | string,
   parameters: string[]
 ) => {
@@ -48,16 +36,10 @@ const checkAtLeastOneParameter = (
 };
 
 const checkNotAllowedParameters = (
-  object: {
-    [key: string]:
-      | object
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown;
-  },
+  object: Record<
+    string,
+    object | string | number | boolean | null | undefined | unknown
+  >,
   representativeName: "req.query" | "req.body" | "req.params" | string,
   allowedParameters: string[]
 ) => {
@@ -75,33 +57,35 @@ const checkNotAllowedParameters = (
 };
 
 const checkTypeOf = (
-  object: {
-    [key: string]:
-      | object
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown;
-  },
+  object: Record<
+    string,
+    object | string | number | boolean | null | undefined | unknown
+  >,
   representativeName: "req.query" | "req.body" | "req.params" | string,
   fieldName: string,
-  type: "number" | "string" | "boolean" | "array" | "object"
+  type: IParameter["type"]
 ) => {
   const field = object[fieldName];
 
-  switch (type) {
-    case "array":
+  switch (true) {
+    case type === "array":
       if (!Array.isArray(field))
         throw new Api400Error(
           `The "${fieldName}" field in ${representativeName} must be an array.`
         );
       break;
-    case "object":
+    case type === "object":
       if (!(field instanceof Object))
         throw new Api400Error(
           `The "${fieldName}" field in ${representativeName} must be an object.`
+        );
+      break;
+    case Array.isArray(type):
+      if (!type.includes(typeof field))
+        throw new Api400Error(
+          `The "${fieldName}" field in ${representativeName} must be one of the following types: ${type
+            .toString()
+            .replaceAll(",", " ")}.`
         );
       break;
     default:
@@ -112,17 +96,11 @@ const checkTypeOf = (
   }
 };
 
-const checkProperties = (
-  object: {
-    [key: string]:
-      | object
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown;
-  },
+export const checkProperties = (
+  object: Record<
+    string,
+    object | string | number | boolean | null | undefined | unknown
+  >,
   representativeName: "req.query" | "req.body" | "req.params" | string,
   params: IParameter[]
 ) => {
@@ -146,5 +124,3 @@ const checkProperties = (
     }
   });
 };
-
-export { checkProperties };

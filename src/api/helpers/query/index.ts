@@ -1,4 +1,4 @@
-import { Query } from "../../../types";
+import { Query } from "@types";
 
 export const queryUrlGen = (query: Query, baseURL: string): string => {
   if (!query) return baseURL;

@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from "express";
-
 type UnionKeys<T> = T extends T ? keyof T : never;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StrictUnionHelper<T, TAll> = T extends any
   ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>>
   : never;
@@ -22,7 +20,27 @@ export type INSCRIPTION_RESPONSE<T> = Exclude<BODY_RESPONSE<T>, "data"> & {
 
 export interface IParameter {
   field: string;
-  type: "number" | "string" | "boolean" | "array" | "object";
+  type:
+    | "array"
+    | "string"
+    | "number"
+    | "bigint"
+    | "boolean"
+    | "symbol"
+    | "undefined"
+    | "object"
+    | "function"
+    | (
+        | "array"
+        | "string"
+        | "number"
+        | "bigint"
+        | "boolean"
+        | "symbol"
+        | "undefined"
+        | "object"
+        | "function"
+      )[];
   optional?: boolean;
   atLeastOne?: boolean;
 }

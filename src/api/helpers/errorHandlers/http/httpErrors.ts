@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import httpStatusCodes from "./httpCodes";
+import { httpStatusCodes } from "@helpers";
 
 interface BaseError {
   message: string;
   status: number;
   name: string;
-  error?: any;
+  error?: unknown;
 }
 
 export interface IBaseError extends Error {
@@ -13,11 +12,11 @@ export interface IBaseError extends Error {
   status: number;
   name: string;
   internalError?: number;
-  error?: any;
+  error?: unknown;
 }
 
 class BaseError extends Error {
-  constructor(message: string, status: number, name: string, error: any) {
+  constructor(message: string, status: number, name: string, error: unknown) {
     super(name);
 
     Object.setPrototypeOf(this, new.target.prototype);
@@ -29,37 +28,37 @@ class BaseError extends Error {
 }
 
 export class Api400Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(message, httpStatusCodes.BAD_REQUEST, "Bad Request", error);
   }
 }
 
 export class Api401Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(message, httpStatusCodes.UNAUTHORIZED, "Unauthorized", error);
   }
 }
 
 export class Api403Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(message, httpStatusCodes.FORBIDDEN, "Forbidden", error);
   }
 }
 
 export class Api404Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(message, httpStatusCodes.NOT_FOUND, "Not found", error);
   }
 }
 
 export class Api409Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(message, httpStatusCodes.CONFLICT, "Conflict", error);
   }
 }
 
 export class Api500Error extends BaseError {
-  constructor(message: string, error?: any) {
+  constructor(message: string, error?: unknown) {
     super(
       message,
       httpStatusCodes.INTERNAL_SERVER,
@@ -69,4 +68,10 @@ export class Api500Error extends BaseError {
   }
 }
 
-export default BaseError;
+export type ApiErrors =
+  | Api400Error
+  | Api401Error
+  | Api403Error
+  | Api404Error
+  | Api409Error
+  | Api500Error;

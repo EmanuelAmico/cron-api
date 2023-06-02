@@ -1,4 +1,4 @@
-const httpStatusCodes = {
+export const httpStatusCodes = {
   OK: 200,
   CREATED: 201,
   NO_CONTENT: 204,
@@ -9,5 +9,3 @@ const httpStatusCodes = {
   CONFLICT: 409,
   INTERNAL_SERVER: 500,
 };
-
-export default httpStatusCodes;

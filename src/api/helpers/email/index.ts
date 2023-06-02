@@ -1,10 +1,10 @@
+import { formatTime, formatDate } from "@helpers";
 import {
   CourseTag,
   ICourse,
   ICourseInformation,
   IEmailTemplates,
-} from "../../../types";
-import { formatTime, formatDate } from "../format";
+} from "@types";
 
 const emailMapper: {
   [key in Exclude<

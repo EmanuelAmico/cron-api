@@ -12,6 +12,6 @@ export const formatDate = (date: Date) => {
 };
 
 export const formatTime = (time: string) => {
-  const strandarizedTime = time;
-  return strandarizedTime.substring(0, time.length - 3);
+  const standardizedTime = time;
+  return standardizedTime.substring(0, time.length - 3);
 };

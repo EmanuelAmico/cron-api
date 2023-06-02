@@ -1,17 +1,18 @@
 import express, { NextFunction, Request, Response } from "express";
-import serverConfig from "./config/server";
-import routes from "./routes";
 import morganBody from "morgan-body";
-import { config } from "./config/env";
-import BaseError from "./helpers/errorHandlers/HTTP/httpErrors";
+import { config, serverConfig } from "@config";
+import { formattedNowDate } from "@utils";
+import {
+  ExternalError,
+  IErrorResponse,
+  ServiceError,
+  ApiErrors,
+} from "@helpers";
+import { allRoutes } from "@routes";
 
 const { NODE_ENV, PORT } = config;
 
 const app = express();
-
-app.get("/", (_req: Request, res: Response) => {
-  res.send("Hello World!");
-});
 
 // Development logger
 if (NODE_ENV === "local" || NODE_ENV === "development") {
@@ -25,19 +26,37 @@ if (NODE_ENV === "local" || NODE_ENV === "development") {
 app.use(serverConfig);
 
 // Routes
-app.use("/", routes);
+app.use("/", allRoutes);
 
 // Error handler
-app.use((err: BaseError, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
-  const status = err.status || 500;
+app.use(
+  (
+    error: Error | ExternalError | ServiceError | ApiErrors,
+    _req: Request<unknown, IErrorResponse, unknown, unknown>,
+    res: Response<IErrorResponse>,
+    _next: NextFunction
+  ) => {
+    const status =
+      error.constructor === Error
+        ? 500
+        : (error as ExternalError | ServiceError | ApiErrors).status || 500;
 
-  res.status(status).json({
-    status,
-    err: err.name,
-    message: err.message,
-  });
-});
+    const errorInfo = {
+      error: error.name,
+      message: error.message,
+      status,
+    };
+
+    console.error(`[API ERROR - ${formattedNowDate()}]`, {
+      name: error.name,
+      message: error.message,
+      status,
+    });
+    console.error(error.stack);
+
+    res.status(status).send(errorInfo);
+  }
+);
 
 // Server start-up
 // eslint-disable-next-line no-console

@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "description": "Cron API",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "prepare": "husky install",
-    "start": "node index.js",
-    "build": "tsc",
-    "dev": "tsc -w & node --watch dist",
+    "start": "node dist",
+    "build": "tsc && tsc-alias -f",
+    "build-check": "tsc --noEmit",
+    "dev": "tsc-watch --onSuccess scripts/onSuccessScript.sh",
     "lint": "eslint . --ext .ts,.js --ignore-path .gitignore --max-warnings=0",
     "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,23 +25,24 @@
   },
   "homepage": "https://gitlab.com/plataforma-5/cron-api#readme",
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.338.0",
+    "@aws-sdk/client-sqs": "^3.342.0",
     "axios": "^1.4.0",
     "cron": "^2.3.1",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.13",
     "@types/cron": "^2.0.1",
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/morgan": "^1.9.4",
     "@types/morgan-json": "^1.1.0",
-    "@types/node": "^20.2.3",
+    "@types/node": "^20.2.5",
     "@types/uuid": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.7",
-    "@typescript-eslint/parser": "^5.59.7",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-typescript": "^3.5.5",
@@ -51,6 +54,8 @@
     "morgan-body": "^2.6.9",
     "morgan-json": "^1.1.0",
     "prettier": "^2.8.8",
+    "tsc-alias": "^1.8.6",
+    "tsc-watch": "^6.0.4",
     "typescript": "^5.0.4"
   }
 }

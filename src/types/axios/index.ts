@@ -1,5 +1,5 @@
 import { Method } from "axios";
-import { StrictUnion } from "../";
+import { StrictUnion } from "@types";
 
 export interface IFetchAPI {
   url: string;

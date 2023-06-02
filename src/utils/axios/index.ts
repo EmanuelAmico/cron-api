@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { IFetchAPI, IAxiosInstance } from "../../types";
+import { IFetchAPI, IAxiosInstance } from "@types";
 
 const generateInstance = ({
   baseURL,

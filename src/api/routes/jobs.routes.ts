@@ -1,17 +1,18 @@
 import { Router } from "express";
-import { JobsController } from "../controllers";
+import { JobsController } from "@controllers";
+import { tryCatch } from "@helpers";
 
 const router = Router();
 
 router
   .route("/")
-  .get(JobsController.listRunningJobs)
-  .post(JobsController.createJob);
-router.get("/search", JobsController.findSimilarJobs);
+  .get(tryCatch(JobsController.listRunningJobs))
+  .post(tryCatch(JobsController.createJob));
+router.get("/search", tryCatch(JobsController.findSimilarJobs));
 router
   .route("/:name")
-  .get(JobsController.getJob)
-  .put(JobsController.editJob)
-  .delete(JobsController.deleteJob);
+  .get(tryCatch(JobsController.getJob))
+  .put(tryCatch(JobsController.editJob))
+  .delete(tryCatch(JobsController.deleteJob));
 
-export default router;
+export { router as jobRoutes };

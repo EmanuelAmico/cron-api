@@ -1,7 +1,7 @@
-import { AxiosJob, Job } from "../../utils";
-import { SQSJob } from "../../utils/job/SQSJob";
+import { Job, AxiosJob, SQSJob } from "@utils";
+import { Method } from "axios";
 
-// The minimum and necessary to create a Job | AxiosJob | SQSJob
+// The minimum and necessary data to create a Job | AxiosJob | SQSJob
 export interface IJob {
   readonly name: string;
   readonly description: string;
@@ -13,7 +13,8 @@ export interface IJob {
 
 export interface IAxiosJob extends IJob {
   readonly url: URL;
-  readonly method: string;
+  readonly query?: Record<string, string>;
+  readonly method: Method;
   readonly headers?: Record<string, string>;
   readonly body?: unknown;
 }

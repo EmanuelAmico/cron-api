@@ -1,7 +1,8 @@
-import { SQSServiceException } from "@aws-sdk/client-sqs";
 import { v4 as uuidv4 } from "uuid";
-import { sqs } from "..";
-import { config } from "../../../config/env";
+import { SQSServiceException } from "@aws-sdk/client-sqs";
+import { sqs } from "@repositories";
+import { config } from "@config";
+import { ExternalError } from "@helpers";
 import {
   CoursesNames,
   IBCForm,
@@ -9,12 +10,11 @@ import {
   IPerson,
   Stage,
   StrictUnion,
-} from "../../../../types";
-import ExternalError from "../../../helpers/errorHandlers/External/externalErrors";
+} from "@types";
 
 const { PIPEDRIVE_QUEUE_URL, PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID } = config;
 
-class PipedriveRepository {
+export class PipedriveRepository {
   public static enqueue = new PipedriveRepository();
 
   public static async listQueues() {
@@ -408,5 +408,3 @@ class PipedriveRepository {
     }
   }
 }
-
-export default PipedriveRepository;

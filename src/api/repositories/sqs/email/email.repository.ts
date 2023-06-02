@@ -1,8 +1,8 @@
 import { SQSServiceException } from "@aws-sdk/client-sqs";
-import { config } from "../../../config/env";
-import { ICourseInformation, IEmailParams } from "../../../../types";
-import { sqs } from "..";
-import ExternalError from "../../../helpers/errorHandlers/External/externalErrors";
+import { config } from "@config";
+import { ICourseInformation, IEmailParams } from "@types";
+import { ExternalError } from "@helpers";
+import { sqs } from "@repositories";
 
 const reasonMapper: Record<string, string> = {
   cc_rejected_insufficient_amount: "Fondos insuficientes",
@@ -27,7 +27,7 @@ const introLiveLandingLink =
 
 const { EMAIL_QUEUE_URL } = config;
 
-class SQSEmailRepository {
+export class SQSEmailRepository {
   public static enqueue = new SQSEmailRepository();
 
   public async email(emailParams: Partial<IEmailParams>) {
@@ -136,5 +136,3 @@ class SQSEmailRepository {
     });
   }
 }
-
-export default SQSEmailRepository;

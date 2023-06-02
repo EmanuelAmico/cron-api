@@ -1,21 +1,18 @@
-import httpStatusCodes from "./HTTP/httpCodes";
-import ServiceError from "./Services/serviceErrors";
+import { httpStatusCodes, ServiceError } from "@helpers";
 
-const handleServiceErrors = (err: ServiceError) => {
-  switch (err.internalError) {
+export const handleServiceErrors = (error: ServiceError) => {
+  switch (error.internalError) {
     case 1:
-      err.status = httpStatusCodes.NOT_FOUND;
+      error.status = httpStatusCodes.NOT_FOUND;
       break;
     case 2:
-      err.status = httpStatusCodes.UNAUTHORIZED;
+      error.status = httpStatusCodes.UNAUTHORIZED;
       break;
     case 3:
-      err.status = httpStatusCodes.UNAUTHORIZED;
+      error.status = httpStatusCodes.UNAUTHORIZED;
       break;
     case 4:
-      err.status = httpStatusCodes.BAD_REQUEST;
+      error.status = httpStatusCodes.BAD_REQUEST;
       break;
   }
 };
-
-export default handleServiceErrors;

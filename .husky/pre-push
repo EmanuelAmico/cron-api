@@ -16,7 +16,7 @@ echo "// -----------------CHECK LINTING----------------------- //"
 npm run lint
 
 echo "// -----------------CHECK BUILDING---------------------- //"
-npm run build
+npm run build-check
 
 echo "// --------------CHECK FOR NEW CHANGES------------------ //"
 hasChanged=0 # 0 if no changes, 1 if changes

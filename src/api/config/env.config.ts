@@ -8,6 +8,7 @@ interface IEnvConfig {
   PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID: string;
   EMAIL_QUEUE_URL: string;
   CROSS_API_TOKEN: string;
+  API_SECRET: string;
 }
 
 interface IAllowedHosts {
@@ -28,6 +29,7 @@ export const config: IEnvConfig = (() => {
     process.env.PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID;
   const EMAIL_QUEUE_URL = process.env.EMAIL_QUEUE_URL;
   const CROSS_API_TOKEN = process.env.CROSS_API_TOKEN;
+  const API_SECRET = process.env.API_SECRET;
 
   if (
     !PORT ||
@@ -38,7 +40,8 @@ export const config: IEnvConfig = (() => {
     !PIPEDRIVE_QUEUE_URL ||
     !PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID ||
     !EMAIL_QUEUE_URL ||
-    !CROSS_API_TOKEN
+    !CROSS_API_TOKEN ||
+    !API_SECRET
   ) {
     const envs = {
       PORT,
@@ -50,6 +53,7 @@ export const config: IEnvConfig = (() => {
       PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
       EMAIL_QUEUE_URL,
       CROSS_API_TOKEN,
+      API_SECRET,
     };
     const missingVar = Object.entries(envs).find(
       ([, value]) => value === undefined
@@ -71,6 +75,7 @@ export const config: IEnvConfig = (() => {
     PIPEDRIVE_QUEUE_UNIQUE_MESSAGE_GROUP_ID,
     EMAIL_QUEUE_URL,
     CROSS_API_TOKEN,
+    API_SECRET,
   };
 })();
 

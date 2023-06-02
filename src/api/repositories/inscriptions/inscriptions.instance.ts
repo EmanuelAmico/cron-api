@@ -1,6 +1,6 @@
-import { allowedHosts } from "../../config/env";
-import { generateInstance } from "../../../utils";
+import { allowedHosts } from "@config";
+import { generateInstance } from "@utils";
 
 const baseURL = allowedHosts.INSCRIPTIONS_API_HOST + "/v1";
 
-export default generateInstance({ baseURL });
+export const inscriptionsAPI = generateInstance({ baseURL });

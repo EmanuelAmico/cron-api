@@ -1,15 +1,19 @@
 import { CronJob, CronTime } from "cron";
-import { IJob, StrictUnion } from "../../types";
+import { IJob, StrictUnion } from "@types";
 import {
   formattedDate,
   formattedNowDate,
   timeDifferenceInMs,
   timeRemaining,
-} from "../date";
-import { filterSimilar, findMostSimilar, pick } from "../helpers";
-import { AxiosJob } from "./AxiosJob";
-import { SQSJob } from "./SQSJob";
-import { JobError, checkAndHandleErrors } from "../errors";
+  filterSimilar,
+  findMostSimilar,
+  pick,
+  AxiosJob,
+  SQSJob,
+  JobError,
+  handleJobError,
+  parseFormattedDate,
+} from "@utils";
 
 class Job implements IJob {
   declare ["constructor"]: typeof Job;
@@ -190,16 +194,16 @@ class Job implements IJob {
     { cron: string; repetitions?: number } | { timer: Date | string | number }
   >) {
     if (Job.allJobs.find((job) => job.name === name))
-      throw new Error("A job with that name already exists.");
+      throw new JobError("A job with that name already exists.");
 
     if (!cron && !timer)
-      throw new Error("Invalid job, must have cron or timer.");
+      throw new JobError("Invalid job, must have cron or timer.");
 
     if (timer && repetitions)
-      throw new Error("Invalid job, timer jobs can't have repetitions.");
+      throw new JobError("Invalid job, timer jobs can't have repetitions.");
 
     if (cron && repetitions && repetitions < 1)
-      throw new Error("Invalid job, repetitions must be greater than 0.");
+      throw new JobError("Invalid job, repetitions must be greater than 0.");
 
     this.#name = name;
     this.#description = description;
@@ -219,7 +223,7 @@ class Job implements IJob {
             this.name
           }' - ${formattedNowDate()}]`
         );
-        checkAndHandleErrors(error as JobError);
+        handleJobError(error as JobError);
       }
     };
     this.#createdAt = formattedNowDate();
@@ -230,9 +234,17 @@ class Job implements IJob {
       this.repetitions = repetitions;
       this.remainingRepetitions = repetitions;
     }
-    if (timer)
-      this.timer =
-        typeof timer === "number" ? timer : timeDifferenceInMs(new Date(timer));
+    if (timer) {
+      try {
+        if (typeof timer === "number") this.timer = timer as number;
+        else if (typeof timer === "string")
+          this.timer = timeDifferenceInMs(parseFormattedDate(timer));
+        else if (timer instanceof Date) this.timer = timeDifferenceInMs(timer);
+        else throw new JobError("Invalid timer.");
+      } catch (error) {
+        throw new JobError(error as Error);
+      }
+    }
     if (onStart) this.onStart = onStart;
     if (onStop) this.onStop = onStop;
     new.target.createdJobs.push(this);
@@ -428,6 +440,11 @@ class Job implements IJob {
       const nextRunDate = new Date(Date.now() + this.timer);
       this.nextRunDate = formattedDate(nextRunDate);
       this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+      this.calculateNextRunTimeRemainingInterval = setInterval(() => {
+        if (!this.timeout)
+          return clearInterval(this.calculateNextRunTimeRemainingInterval);
+        this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+      }, 1000);
     }
 
     this.constructor.runningJobs.push(this);
@@ -467,10 +484,10 @@ class Job implements IJob {
     onStart?: () => void;
     onStop?: () => void;
   } & StrictUnion<
-    { cron: string; repetitions?: number } | { timer: Date | string | number }
+    { cron?: string; repetitions?: number } | { timer?: Date | string | number }
   >) {
     if (Job.allJobs.some((job) => job.name === name)) {
-      throw new Error(
+      throw new JobError(
         `A job with name ${name} already exists. Job names must be unique. Please, use another name.`
       );
     }
@@ -482,7 +499,7 @@ class Job implements IJob {
       }
       if (repetitions) {
         if (repetitions <= this.executionTimes)
-          throw new Error(
+          throw new JobError(
             "Invalid job, repetitions must be greater than execution times."
           );
         this.repetitions = repetitions;
@@ -499,17 +516,36 @@ class Job implements IJob {
 
     if (this.timer) {
       if (timer) {
-        this.timer =
-          typeof timer === "number"
-            ? timer
-            : timeDifferenceInMs(new Date(timer));
-      }
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-        this.timeout = setTimeout(() => {
-          this.callback();
-          this.stop();
-        }, this.timer);
+        try {
+          if (typeof timer === "number") this.timer = timer as number;
+          else if (typeof timer === "string")
+            this.timer = timeDifferenceInMs(parseFormattedDate(timer));
+          else if (timer instanceof Date)
+            this.timer = timeDifferenceInMs(timer);
+          else throw new JobError("Invalid timer.");
+        } catch (error) {
+          throw new JobError(error as Error);
+        }
+
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+          this.timeout = setTimeout(() => {
+            this.callback();
+            this.stop();
+          }, this.timer);
+        }
+
+        if (this.calculateNextRunTimeRemainingInterval) {
+          clearInterval(this.calculateNextRunTimeRemainingInterval);
+          const nextRunDate = new Date(Date.now() + this.timer);
+          this.nextRunDate = formattedDate(nextRunDate);
+          this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+          this.calculateNextRunTimeRemainingInterval = setInterval(() => {
+            if (!this.timeout)
+              return clearInterval(this.calculateNextRunTimeRemainingInterval);
+            this.nextRunTimeRemaining = timeRemaining(nextRunDate);
+          }, 1000);
+        }
       }
       if (name) this.name = name;
       if (description) this.description = description;

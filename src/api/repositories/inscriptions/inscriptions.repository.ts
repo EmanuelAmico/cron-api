@@ -1,6 +1,5 @@
-import ExternalError from "../../helpers/errorHandlers/External/externalErrors";
-import inscriptionsAPI from "./inscriptions.instance";
-import { queryUrlGen } from "../../helpers";
+import { queryUrlGen, ExternalError } from "@helpers";
+import { inscriptionsAPI } from "@repositories";
 import {
   ICourseQuery,
   ICoursesQueryResponse,
@@ -18,9 +17,9 @@ import {
   IInscriptionsRole,
   IUserInscriptionRol,
   IUpdatedUserInscriptionRoles,
-} from "../../../types";
+} from "@types";
 
-class InscriptionsRepository {
+export class InscriptionsRepository {
   static async getCourses(query?: ICourseQuery) {
     try {
       const response = await inscriptionsAPI<
@@ -166,7 +165,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<CourseType[]>
       >({
         method: "GET",
-        url: `/data/typesofcourses`,
+        url: "/data/typesofcourses",
       });
       return response.content;
     } catch (error) {
@@ -225,7 +224,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<{ cohort: ICohort; commission: ICommission }>
       >({
         method: "POST",
-        url: `/commissions`,
+        url: "/commissions",
         body,
       });
       return response.content;
@@ -338,7 +337,7 @@ class InscriptionsRepository {
         INSCRIPTION_RESPONSE<IInscriptionsRole[]>
       >({
         method: "GET",
-        url: `/roles`,
+        url: "/roles",
       });
       return response.content;
     } catch (error) {
@@ -381,5 +380,3 @@ class InscriptionsRepository {
     }
   }
 }
-
-export default InscriptionsRepository;
