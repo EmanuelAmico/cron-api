@@ -1,4 +1,4 @@
-# Cron API
+# Plataforma5 - Cron API
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
 ![License](https://img.shields.io/badge/license-ISC-blue)
@@ -75,6 +75,6 @@ This project is licensed under the ISC License. See the LICENSE file for more de
 
 ---
 
-Made with 🫶🏽 by [Plataforma5](https://www.plataforma5.la/).
+Made with 💖 by [Plataforma5](https://www.plataforma5.la/).
 
 

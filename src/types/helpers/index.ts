@@ -20,7 +20,27 @@ export type INSCRIPTION_RESPONSE<T> = Exclude<BODY_RESPONSE<T>, "data"> & {
 
 export interface IParameter {
   field: string;
-  type: "number" | "string" | "boolean" | "array" | "object";
+  type:
+    | "array"
+    | "string"
+    | "number"
+    | "bigint"
+    | "boolean"
+    | "symbol"
+    | "undefined"
+    | "object"
+    | "function"
+    | (
+        | "array"
+        | "string"
+        | "number"
+        | "bigint"
+        | "boolean"
+        | "symbol"
+        | "undefined"
+        | "object"
+        | "function"
+      )[];
   optional?: boolean;
   atLeastOne?: boolean;
 }

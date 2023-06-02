@@ -126,10 +126,16 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
         const value = query[key];
         url.searchParams.append(key, value);
       }
-      this.query = query;
+    }
+
+    const queryData: Record<string, string> = {};
+
+    for (const [key, value] of url.searchParams.entries()) {
+      queryData[key] = value;
     }
 
     if (body) this.body = body;
+    if (Object.keys(queryData).length) this.query = queryData;
     this.#url = url;
     this.#method = method;
   }
@@ -267,7 +273,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   }: Parameters<(typeof Job)["prototype"]["edit"]>[0] & {
     url?: string;
     query?: Record<string, string>;
-    method: Method;
+    method?: Method;
     body?: BodyType;
     instance?: ReturnType<typeof generateInstance>;
   }) {
@@ -291,13 +297,29 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
     if (urlString) {
       const url = new URL(urlString);
 
-      if (query) {
-        this.query = query;
-        for (const key in query) {
-          const value = query[key];
-          url.searchParams.append(key, value);
-        }
+      for (const [key, value] of this.url.searchParams.entries()) {
+        url.searchParams.append(key, value);
       }
+
+      const queryData: Record<string, string> = {};
+
+      for (const [key, value] of url.searchParams.entries()) {
+        queryData[key] = value;
+      }
+
+      if (Object.keys(queryData).length) this.query = queryData;
+    }
+
+    if (query) {
+      const url = new URL(this.url.origin);
+
+      for (const key in query) {
+        const value = query[key];
+        url.searchParams.append(key, value);
+      }
+
+      this.url = url;
+      this.query = query;
     }
 
     if (method) this.method = method;

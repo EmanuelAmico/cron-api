@@ -96,6 +96,7 @@ export class JobService {
     repetitions,
     timer,
     url,
+    query,
     method,
     body,
     headers,
@@ -119,6 +120,7 @@ export class JobService {
           repetitions,
           url,
           method,
+          query,
           body,
           headers,
         });
@@ -203,7 +205,8 @@ export class JobService {
   }
 
   public static editJob({
-    name,
+    name: oldName,
+    newName: name = oldName,
     description,
     cron,
     repetitions,
@@ -212,17 +215,18 @@ export class JobService {
     query,
     method,
     body,
-    instance,
     queueUrl,
     queueType,
     messageGroupId,
     messageDeduplicationId,
-  }: { name: string } & Parameters<InstanceType<typeof AxiosJob>["edit"]>[0] &
-    Parameters<InstanceType<typeof SQSJob>["edit"]>[0]) {
+  }: { name: string; newName?: string } & StrictUnion<
+    | Parameters<InstanceType<typeof AxiosJob>["edit"]>[0]
+    | Parameters<InstanceType<typeof SQSJob>["edit"]>[0]
+  >) {
     const job =
-      Job.getJobByName(name) ||
-      AxiosJob.getJobByName(name) ||
-      SQSJob.getJobByName(name);
+      Job.getJobByName(oldName) ||
+      AxiosJob.getJobByName(oldName) ||
+      SQSJob.getJobByName(oldName);
 
     if (!job) throw new ServiceError("not_found", "Job not found");
 
@@ -238,7 +242,6 @@ export class JobService {
             query,
             method,
             body,
-            instance,
           })
           .toJSON();
       }
@@ -254,7 +257,6 @@ export class JobService {
             query,
             method,
             body,
-            instance,
           })
           .toJSON();
       }
