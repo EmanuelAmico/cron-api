@@ -14,6 +14,9 @@ const { NODE_ENV, PORT } = config;
 
 const app = express();
 
+// Health check
+app.get("/ping", (req, res) => res.send("OK"));
+
 // Development logger
 if (NODE_ENV === "local" || NODE_ENV === "development") {
   morganBody(app, {
