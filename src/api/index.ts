@@ -29,7 +29,7 @@ if (NODE_ENV === "local" || NODE_ENV === "development") {
 app.use(serverConfig);
 
 // Routes
-app.use("/", allRoutes);
+app.use("/v1", allRoutes);
 
 // Error handler
 app.use(
