@@ -360,7 +360,14 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   public toJSON() {
     return {
       ...super.toJSON(),
-      ...pick(this, ["url", "method", "headers", "query", "body"]),
+      ...pick(this, [
+        "url",
+        "method",
+        "headers",
+        "query",
+        "body",
+        "lastResponse",
+      ]),
     };
   }
 }
