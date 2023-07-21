@@ -1,4 +1,4 @@
-import { Method } from "axios";
+import { AxiosError, Method } from "axios";
 import { Job, generateInstance, filterSimilar, pick } from "@utils";
 import { IAxiosJob, StrictUnion } from "@types";
 
@@ -11,6 +11,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   #headers?: Record<string, string>;
   #query?: Record<string, string>;
   #body?: BodyType;
+  #lastResponse?: ResponseType;
   static #runningJobs: AxiosJob[] = [];
   static #createdJobs: AxiosJob[] = [];
   public get url() {
@@ -55,6 +56,12 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   private static set createdJobs(createdJobs: AxiosJob[]) {
     this.#createdJobs = createdJobs;
   }
+  public get lastResponse() {
+    return this.#lastResponse;
+  }
+  private set lastResponse(lastResponse: ResponseType | undefined) {
+    this.#lastResponse = lastResponse;
+  }
 
   constructor({
     name,
@@ -82,21 +89,39 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
       | { headers?: Record<string, string> }
       | { instance?: ReturnType<typeof generateInstance> }
     >) {
-    const callback = async () =>
-      instance
-        ? await instance<ResponseType>({
-            method: this.method,
-            url: this.url.href,
-            body: this.body,
-          })
-        : await generateInstance({
-            baseURL: urlString,
-            customHeaders: headers,
-          })<ResponseType extends undefined ? unknown : ResponseType>({
+    const callback = async () => {
+      try {
+        if (instance) {
+          this.lastResponse = await instance<ResponseType>({
             method: this.method,
             url: this.url.href,
             body: this.body,
           });
+        } else {
+          this.lastResponse = await generateInstance({
+            baseURL: urlString,
+            customHeaders: headers,
+          })<ResponseType>({
+            method: this.method,
+            url: this.url.href,
+            body: this.body,
+          });
+        }
+
+        return this.lastResponse;
+      } catch (err) {
+        const error = err as AxiosError;
+
+        if (error.response) {
+          this.lastResponse = {
+            status: error.response.status,
+            body: error.response.data,
+          } as ResponseType;
+        }
+
+        throw error;
+      }
+    };
 
     super(
       cron
