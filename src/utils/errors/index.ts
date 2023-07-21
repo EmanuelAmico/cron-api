@@ -96,13 +96,22 @@ export class JobError implements IJobError {
   }
 }
 
-export const handleJobError = ({ name, message, status, stack }: JobError) =>
+export const handleJobError = (error: JobError | AxiosError) => {
   console.error(
-    `[${name}]`,
+    `[${error.name}]`,
     "\n\n",
-    `[Status: ${status}]`,
+    `[Status: ${
+      error instanceof AxiosError ? error.response?.status : error.status
+    }]`,
     "\n\n",
-    `[Message: ${message}]`,
+    `[Message: ${error.message}]`,
     "\n\n",
-    `[Stack: ${stack}]`
+    `[Stack: ${error.stack}]`,
+    "\n\n",
+    `[Data: ${
+      error instanceof AxiosError
+        ? JSON.stringify(error.response?.data, null, 4)
+        : ""
+    }]`
   );
+};

@@ -14,6 +14,7 @@ import {
   handleJobError,
   parseFormattedDate,
 } from "@utils";
+import { AxiosError } from "axios";
 
 class Job implements IJob {
   declare ["constructor"]: typeof Job;
@@ -223,7 +224,7 @@ class Job implements IJob {
             this.name
           }' - ${formattedNowDate()}]`
         );
-        handleJobError(error as JobError);
+        handleJobError(error as AxiosError | JobError);
       }
     };
     this.#createdAt = formattedNowDate();
