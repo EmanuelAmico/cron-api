@@ -107,11 +107,8 @@ export const handleJobError = (error: JobError | AxiosError) => {
     `[Message: ${error.message}]`,
     "\n\n",
     `[Stack: ${error.stack}]`,
-    "\n\n",
-    `[Data: ${
-      error instanceof AxiosError
-        ? JSON.stringify(error.response?.data, null, 4)
-        : ""
-    }]`
+    error instanceof AxiosError
+      ? `\n\n[Response Body: ${JSON.stringify(error.response?.data, null, 4)}]`
+      : ""
   );
 };
