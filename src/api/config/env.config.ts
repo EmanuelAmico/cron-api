@@ -16,6 +16,7 @@ interface IAllowedHosts {
   INSCRIPTIONS_API_HOST: string;
   DISCORD_API_HOST: string;
   PLEDU_API_HOST: string;
+  INSCRIPTIONS_BFF_HOST: string;
 }
 
 export const config: IEnvConfig = (() => {
@@ -84,18 +85,21 @@ export const allowedHosts: IAllowedHosts = (() => {
   const INSCRIPTIONS_API_HOST = process.env.INSCRIPTIONS_API_HOST;
   const DISCORD_API_HOST = process.env.DISCORD_API_HOST;
   const PLEDU_API_HOST = process.env.PLEDU_API_HOST;
+  const INSCRIPTIONS_BFF_HOST = process.env.INSCRIPTIONS_BFF_HOST;
 
   if (
     !AUTH_API_HOST ||
     !INSCRIPTIONS_API_HOST ||
     !DISCORD_API_HOST ||
-    !PLEDU_API_HOST
+    !PLEDU_API_HOST ||
+    !INSCRIPTIONS_BFF_HOST
   ) {
     const envs = {
       AUTH_API_HOST,
       INSCRIPTIONS_API_HOST,
       DISCORD_API_HOST,
       PLEDU_API_HOST,
+      INSCRIPTIONS_BFF_HOST,
     };
     const missingVar = Object.entries(envs).find(
       ([, value]) => value === undefined
@@ -112,5 +116,6 @@ export const allowedHosts: IAllowedHosts = (() => {
     INSCRIPTIONS_API_HOST,
     DISCORD_API_HOST,
     PLEDU_API_HOST,
+    INSCRIPTIONS_BFF_HOST,
   };
 })();
