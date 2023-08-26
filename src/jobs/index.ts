@@ -1,8 +1,9 @@
 import { PredefinedJobs } from "@types";
 
 import githubJobs from "./github.jobs";
+import contentJobs from "./content.jobs";
 
-const jobs: PredefinedJobs = [...githubJobs];
+const jobs: PredefinedJobs = [...githubJobs, ...contentJobs];
 
 jobs.forEach((job) => job.start());
 
