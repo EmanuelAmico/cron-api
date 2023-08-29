@@ -12,7 +12,7 @@ deploy-dev:
   image: docker
   before_script:
     - apk --update --no-cache add binutils curl nodejs jq
-    - apk del libc6-compat
+    - apk info libc6-compat && apk del libc6-compat
     - curl -sL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub
     - curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-2.32-r0.apk
     - curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-bin-2.32-r0.apk
@@ -69,7 +69,7 @@ deploy-prod:
   image: docker
   before_script:
     - apk --update --no-cache add binutils curl nodejs jq
-    - apk del libc6-compat
+    - apk info libc6-compat && apk del libc6-compat
     - curl -sL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub
     - curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-2.32-r0.apk
     - curl -sLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-bin-2.32-r0.apk
