@@ -34,7 +34,7 @@ deploy-dev:
     - echo '[default]' >| ~/.aws/config
     - echo region=$REGION >> ~/.aws/config
     - echo 'output=json' >> ~/.aws/config
-    - cd /builds/plataforma-5/bff-template #check dir
+    - cd /builds/plataforma-5/cron-api
   script:
     - echo "Starting DEV build process"
 
@@ -91,7 +91,7 @@ deploy-prod:
     - echo '[default]' >| ~/.aws/config
     - echo region=$REGION >> ~/.aws/config
     - echo 'output=json' >> ~/.aws/config
-    - cd /builds/plataforma-5/bff-template #check dir
+    - cd /builds/plataforma-5/cron-api
   script:
     - echo "Starting PROD build process"
 
