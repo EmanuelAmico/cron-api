@@ -12,4 +12,13 @@ export default [
     instance: inscriptionsAPI,
     method: "PUT",
   }),
+  new AxiosJob({
+    name: "intro-completion-email",
+    description:
+      "Periodically check which full stack intro ended and send the corresponding email",
+    cron: "0 0 * * *",
+    url: "/cohorts/emails/intro/end",
+    instance: inscriptionsAPI,
+    method: "POST",
+  }),
 ];
