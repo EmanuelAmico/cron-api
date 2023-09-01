@@ -1,5 +1,6 @@
 import { AxiosJob } from "@utils";
-import { allowedHosts } from "@config";
+
+import { inscriptionsAPI } from "../api/repositories/inscriptions/inscriptions.instance";
 
 export default [
   new AxiosJob({
@@ -7,7 +8,8 @@ export default [
     description:
       "Periodically send an event to check which bootcamp courses start and send the prep repository",
     cron: "0 0 * * *",
-    url: `${allowedHosts.INSCRIPTIONS_BFF_HOST}/cohorts/invite/prep`,
+    url: "/cohorts/invite/prep",
+    instance: inscriptionsAPI,
     method: "POST",
   }),
 ];
