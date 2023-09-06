@@ -12,7 +12,7 @@ export interface IJob {
 }
 
 export interface IAxiosJob extends IJob {
-  readonly url: URL;
+  readonly url?: URL;
   readonly query?: Record<string, string>;
   readonly method: Method;
   readonly headers?: Record<string, string>;
