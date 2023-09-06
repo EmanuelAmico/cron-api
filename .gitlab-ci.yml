@@ -39,7 +39,7 @@ deploy-dev:
     - echo "Starting DEV build process"
 
     - echo "Building image..."
-    - docker build -f ./Dockerfile -t $CONTAINER_SERVICE_NAME:$CI_COMMIT_SHORT_SHA .
+    - docker build -f ./Dockerfile --load -t $CONTAINER_SERVICE_NAME:$CI_COMMIT_SHORT_SHA .
 
     - echo "Pushing image..."
 
@@ -96,7 +96,7 @@ deploy-prod:
     - echo "Starting PROD build process"
 
     - echo "Building image..."
-    - docker build -f ./Dockerfile -t $CONTAINER_SERVICE_NAME:$CI_COMMIT_SHORT_SHA .
+    - docker build -f ./Dockerfile --load -t $CONTAINER_SERVICE_NAME:$CI_COMMIT_SHORT_SHA .
 
     - echo "Pushing image..."
 
