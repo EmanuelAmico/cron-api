@@ -2,7 +2,7 @@ image: docker:19.03.12
 
 variables:
   REGION: us-east-1
-  CONTAINER_SERVICE_NAME: bff-template
+  CONTAINER_SERVICE_NAME: cron
 
 services:
   - docker:18.09.7-dind
