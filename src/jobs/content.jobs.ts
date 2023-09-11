@@ -7,7 +7,7 @@ export default [
     name: "content-roles",
     description:
       "Periodically send an event to check which bootcamp starts and assign the corresponding content roles",
-    cron: "0 16 * * *",
+    cron: "0 17 * * *",
     path: "/cohorts/roles",
     instance: inscriptionsBFF,
     method: "PUT",
