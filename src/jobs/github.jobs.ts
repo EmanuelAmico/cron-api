@@ -7,7 +7,7 @@ export default [
     name: "prep-invitation",
     description:
       "Periodically send an event to check which bootcamp courses start and send the prep repository",
-    cron: "0 16 * * *",
+    cron: "0 17 * * *",
     path: "/cohorts/invite/prep",
     instance: inscriptionsBFF,
     method: "POST",
