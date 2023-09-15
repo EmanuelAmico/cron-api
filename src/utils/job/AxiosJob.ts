@@ -12,7 +12,8 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   extends Job
   implements IAxiosJob
 {
-  #url: URL;
+  #url?: URL;
+  #path?: string;
   #method: Method;
   #headers?: Record<string, string>;
   #query?: Record<string, string>;
@@ -21,10 +22,16 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
   static #runningJobs: AxiosJob[] = [];
   static #createdJobs: AxiosJob[] = [];
   public get url() {
-    return this.#url;
+    return this.#url as URL;
   }
   private set url(url: URL) {
     this.#url = url;
+  }
+  public get path(): string | undefined {
+    return this.#path;
+  }
+  private set path(path: string | undefined) {
+    this.#path = path;
   }
   public get method() {
     return this.#method;
@@ -78,6 +85,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
     repetitions,
     timer,
     url: urlString,
+    path,
     method,
     headers,
     query,
@@ -89,13 +97,12 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
     StrictUnion<
       { cron: string; repetitions?: number } | { timer: Date | string | number }
     > & {
-      url: string;
       query?: Record<string, string>;
       method: Method;
       body?: BodyType;
     } & StrictUnion<
-      | { headers?: Record<string, string> }
-      | { instance?: ReturnType<typeof generateInstance> }
+      | { url: string; headers?: Record<string, string> }
+      | { instance?: ReturnType<typeof generateInstance>; path: string }
     >) {
     const callback = async () => {
       try {
@@ -104,7 +111,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
             runDate: formattedNowDate(),
             body: await instance<ResponseType>({
               method: this.method,
-              url: this.url.href,
+              url: this.path || "/",
               body: this.body,
             }),
           };
@@ -112,7 +119,7 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
           this.lastResponse = {
             runDate: formattedNowDate(),
             body: await generateInstance({
-              baseURL: urlString,
+              baseURL: urlString as string,
               customHeaders: headers,
             })<ResponseType>({
               method: this.method,
@@ -158,24 +165,29 @@ class AxiosJob<BodyType = unknown, ResponseType = unknown>
           }
     );
 
-    const url = new URL(urlString);
+    if (urlString && !instance) {
+      const url = new URL(urlString);
 
-    if (query) {
-      for (const key in query) {
-        const value = query[key];
-        url.searchParams.append(key, value);
+      if (query) {
+        for (const key in query) {
+          const value = query[key];
+          url.searchParams.append(key, value);
+        }
       }
-    }
 
-    const queryData: Record<string, string> = {};
+      this.#url = url;
 
-    for (const [key, value] of url.searchParams.entries()) {
-      queryData[key] = value;
+      const queryData: Record<string, string> = {};
+
+      for (const [key, value] of url.searchParams.entries()) {
+        queryData[key] = value;
+      }
+
+      if (Object.keys(queryData).length) this.query = queryData;
     }
 
     if (body) this.body = body;
-    if (Object.keys(queryData).length) this.query = queryData;
-    this.#url = url;
+    if (path) this.path = path;
     this.#method = method;
   }
 

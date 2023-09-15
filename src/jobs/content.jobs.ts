@@ -1,16 +1,16 @@
 import { AxiosJob } from "@utils";
 
-import { inscriptionsAPI } from "../api/repositories/inscriptions/inscriptions.instance";
 import { CohortStatus, CourseTags } from "@types";
+import { inscriptionsBFF } from "../api/repositories/inscriptions/inscriptions.instance";
 
 export default [
   new AxiosJob({
     name: "content-roles",
     description:
       "Periodically send an event to check which bootcamp starts and assign the corresponding content roles",
-    cron: "0 0 * * *",
-    url: "/cohorts/roles",
-    instance: inscriptionsAPI,
+    cron: "0 17 * * *",
+    path: "/cohorts/roles",
+    instance: inscriptionsBFF,
     method: "PUT",
   }),
   new AxiosJob({
@@ -20,7 +20,7 @@ export default [
     cron: "0 0 * * *",
     url: "/cohorts/emails",
     body: { phase: CohortStatus.STARTED, tag: CourseTags.INTRO_JAVASCRIPT },
-    instance: inscriptionsAPI,
+    instance: inscriptionsBFF,
     method: "POST",
   }),
 ];
