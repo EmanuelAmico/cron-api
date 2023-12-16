@@ -7,7 +7,7 @@ export type CoursesNames =
   | "Bootcamp JS"
   | "Bootcamp SF";
 
-export type CourseTags =
+type CourseTags =
   | "INTRO_JAVASCRIPT"
   | "INTRO_JAVASCRIPT_ATR"
   | "BC_JAVASCRIPT"

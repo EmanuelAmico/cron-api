@@ -18,7 +18,7 @@ export default [
     description:
       "Periodically check which full stack intro ended and send the corresponding email",
     cron: "0 0 * * *",
-    url: "/cohorts/emails",
+    path: "/cohorts/emails",
     body: { phase: CohortStatus.STARTED, tag: CourseTags.INTRO_JAVASCRIPT },
     instance: inscriptionsBFF,
     method: "POST",
